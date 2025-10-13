@@ -84,7 +84,7 @@ build-php-fpm: build-php-fpm-83 build-php-fpm-84 ## Build all PHP-FPM containers
 
 .PHONY: build-php-fpm-83
 build-php-fpm-83: ## Build PHP-FPM 8.3 container
-	$(call print_header,"Building PHP-FPM 8.3 ($(PHP83_FULL_VERSION))")
+	$(call print_header,"Building PHP-FPM 8.3 $(PHP83_FULL_VERSION)")
 	docker build \
 		--platform $(PLATFORM) \
 		--build-arg ALPINE_VERSION=$(ALPINE_VERSION) \
@@ -99,7 +99,7 @@ build-php-fpm-83: ## Build PHP-FPM 8.3 container
 
 .PHONY: build-php-fpm-84
 build-php-fpm-84: ## Build PHP-FPM 8.4 container (latest)
-	$(call print_header,"Building PHP-FPM 8.4 ($(PHP84_FULL_VERSION))")
+	$(call print_header,"Building PHP-FPM 8.4 $(PHP84_FULL_VERSION)")
 	docker build \
 		--platform $(PLATFORM) \
 		--build-arg ALPINE_VERSION=$(ALPINE_VERSION) \

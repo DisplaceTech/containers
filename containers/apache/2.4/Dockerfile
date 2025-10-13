@@ -17,14 +17,11 @@ RUN apk add --no-cache \
     apache2=2.4.65-r0 \
     apache2-ssl=2.4.65-r0 \
     apache2-utils=2.4.65-r0 \
-    apache2-mod-rewrite=2.4.65-r0 \
-    apache2-mod-headers=2.4.65-r0 \
     curl \
     && rm -rf /var/cache/apk/*
 
-# Create non-root user
-RUN addgroup -g 1001 apache && \
-    adduser -D -u 1001 -G apache -s /bin/sh apache
+# Use the existing apache user (created by package installation)
+# UID: 100, GID: 101
 
 # Create necessary directories and set permissions
 RUN mkdir -p /var/www/html \

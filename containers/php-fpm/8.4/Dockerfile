@@ -23,10 +23,8 @@ RUN apk add --no-cache \
     php84-mysqli=8.4.13-r0 \
     php84-pdo=8.4.13-r0 \
     php84-pdo_mysql=8.4.13-r0 \
-    php84-json=8.4.13-r0 \
     php84-openssl=8.4.13-r0 \
     php84-curl=8.4.13-r0 \
-    php84-zlib=8.4.13-r0 \
     php84-xml=8.4.13-r0 \
     php84-xmlwriter=8.4.13-r0 \
     php84-xmlreader=8.4.13-r0 \
@@ -43,13 +41,10 @@ RUN apk add --no-cache \
     php84-iconv=8.4.13-r0 \
     php84-bcmath=8.4.13-r0 \
     php84-ctype=8.4.13-r0 \
-    php84-filter=8.4.13-r0 \
-    php84-hash=8.4.13-r0 \
-    php84-pcre=8.4.13-r0 \
     php84-posix=8.4.13-r0 \
     php84-sodium=8.4.13-r0 \
-    php84-redis=8.4.13-r0 \
-    php84-pecl-imagick=8.4.13-r0 \
+    php84-pecl-redis=6.2.0-r0 \
+    php84-pecl-imagick=3.8.0-r1 \
     curl \
     && rm -rf /var/cache/apk/*
 
@@ -57,9 +52,8 @@ RUN apk add --no-cache \
 RUN ln -sf /usr/bin/php84 /usr/bin/php \
     && ln -sf /usr/sbin/php-fpm84 /usr/sbin/php-fpm
 
-# Create non-root user
-RUN addgroup -g 1001 www-data && \
-    adduser -D -u 1001 -G www-data -s /bin/sh www-data
+# Create non-root user (www-data group already exists from PHP packages)
+RUN adduser -D -u 1001 -G www-data -s /bin/sh www-data
 
 # Create required directories
 RUN mkdir -p /var/log/php-fpm \

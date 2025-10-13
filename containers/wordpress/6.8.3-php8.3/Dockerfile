@@ -19,7 +19,7 @@ LABEL org.opencontainers.image.base.name="alpine:${ALPINE_VERSION}"
 
 # WordPress and WP-CLI versions
 ENV WORDPRESS_VERSION=6.8.3
-ENV WORDPRESS_SHA256=26b55ab0b1bb0b8ad5a1b21a70b45b4a2e17b7b6a2b98e1c8eaa3ff7e6b3a1a7
+ENV WORDPRESS_SHA256=92da34c9960e64d1258652c1ef73c517f7e46ac6dfd2dfc75436d3855af46b0c
 ENV WPCLI_VERSION=2.12.0
 
 # Install Apache, PHP, and WordPress dependencies
@@ -27,34 +27,29 @@ RUN apk add --no-cache \
     apache2=2.4.65-r0 \
     apache2-ssl=2.4.65-r0 \
     apache2-utils=2.4.65-r0 \
-    apache2-mod-rewrite=2.4.65-r0 \
-    apache2-mod-headers=2.4.65-r0 \
-    php83=${PHP_FULL_VERSION}-${PHP_RELEASE} \
-    php83-apache2=${PHP_FULL_VERSION}-${PHP_RELEASE} \
-    php83-mysqli=${PHP_FULL_VERSION}-${PHP_RELEASE} \
-    php83-pdo_mysql=${PHP_FULL_VERSION}-${PHP_RELEASE} \
-    php83-json=${PHP_FULL_VERSION}-${PHP_RELEASE} \
-    php83-openssl=${PHP_FULL_VERSION}-${PHP_RELEASE} \
-    php83-curl=${PHP_FULL_VERSION}-${PHP_RELEASE} \
-    php83-xml=${PHP_FULL_VERSION}-${PHP_RELEASE} \
-    php83-xmlwriter=${PHP_FULL_VERSION}-${PHP_RELEASE} \
-    php83-xmlreader=${PHP_FULL_VERSION}-${PHP_RELEASE} \
-    php83-simplexml=${PHP_FULL_VERSION}-${PHP_RELEASE} \
-    php83-dom=${PHP_FULL_VERSION}-${PHP_RELEASE} \
-    php83-mbstring=${PHP_FULL_VERSION}-${PHP_RELEASE} \
-    php83-gd=${PHP_FULL_VERSION}-${PHP_RELEASE} \
-    php83-intl=${PHP_FULL_VERSION}-${PHP_RELEASE} \
-    php83-zip=${PHP_FULL_VERSION}-${PHP_RELEASE} \
-    php83-fileinfo=${PHP_FULL_VERSION}-${PHP_RELEASE} \
-    php83-session=${PHP_FULL_VERSION}-${PHP_RELEASE} \
-    php83-iconv=${PHP_FULL_VERSION}-${PHP_RELEASE} \
-    php83-ctype=${PHP_FULL_VERSION}-${PHP_RELEASE} \
-    php83-filter=${PHP_FULL_VERSION}-${PHP_RELEASE} \
-    php83-hash=${PHP_FULL_VERSION}-${PHP_RELEASE} \
-    php83-tokenizer=${PHP_FULL_VERSION}-${PHP_RELEASE} \
-    php83-opcache=${PHP_FULL_VERSION}-${PHP_RELEASE} \
-    php83-exif=${PHP_FULL_VERSION}-${PHP_RELEASE} \
-    php83-pecl-imagick=${PHP_FULL_VERSION}-${PHP_RELEASE} \
+    php83=8.3.26-r0 \
+    php83-apache2=8.3.26-r0 \
+    php83-mysqli=8.3.26-r0 \
+    php83-pdo_mysql=8.3.26-r0 \
+    php83-openssl=8.3.26-r0 \
+    php83-curl=8.3.26-r0 \
+    php83-xml=8.3.26-r0 \
+    php83-xmlwriter=8.3.26-r0 \
+    php83-xmlreader=8.3.26-r0 \
+    php83-simplexml=8.3.26-r0 \
+    php83-dom=8.3.26-r0 \
+    php83-mbstring=8.3.26-r0 \
+    php83-gd=8.3.26-r0 \
+    php83-intl=8.3.26-r0 \
+    php83-zip=8.3.26-r0 \
+    php83-fileinfo=8.3.26-r0 \
+    php83-session=8.3.26-r0 \
+    php83-iconv=8.3.26-r0 \
+    php83-ctype=8.3.26-r0 \
+    php83-tokenizer=8.3.26-r0 \
+    php83-opcache=8.3.26-r0 \
+    php83-exif=8.3.26-r0 \
+    php83-pecl-imagick=3.8.0-r1 \
     wget \
     unzip \
     less \
@@ -63,11 +58,10 @@ RUN apk add --no-cache \
     && ln -sf /usr/bin/php83 /usr/bin/php \
     && rm -rf /var/cache/apk/*
 
-# Create users and groups
-RUN addgroup -g 1001 apache && \
-    adduser -D -u 1001 -G apache -s /bin/sh apache \
-    && addgroup -g 1002 www-data \
-    && adduser -D -u 1002 -G www-data -s /bin/sh www-data
+# Use existing system users (apache from Apache package, www-data from PHP package)
+# apache: UID=100, GID=101
+# www-data: GID=82 (group exists, add user)
+RUN adduser -D -u 1001 -G www-data -s /bin/sh www-data
 
 # Create directories and set permissions
 RUN mkdir -p /var/www/html \

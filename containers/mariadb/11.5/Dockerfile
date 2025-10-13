@@ -21,9 +21,8 @@ RUN apk add --no-cache \
     tzdata \
     && rm -rf /var/cache/apk/*
 
-# Create non-root user for MariaDB
-RUN addgroup -g 1001 mysql && \
-    adduser -D -u 1001 -G mysql -s /bin/sh mysql
+# Use the existing mysql user and group (created by MariaDB package)
+# UID: 100, GID: 101
 
 # Create required directories and set permissions
 RUN mkdir -p /var/lib/mysql \

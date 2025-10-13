@@ -19,7 +19,7 @@ LABEL org.opencontainers.image.base.name="alpine:${ALPINE_VERSION}"
 
 # WordPress and WP-CLI versions
 ENV WORDPRESS_VERSION=6.8.3
-ENV WORDPRESS_SHA256=26b55ab0b1bb0b8ad5a1b21a70b45b4a2e17b7b6a2b98e1c8eaa3ff7e6b3a1a7
+ENV WORDPRESS_SHA256=92da34c9960e64d1258652c1ef73c517f7e46ac6dfd2dfc75436d3855af46b0c
 ENV WPCLI_VERSION=2.12.0
 
 # Install Apache, PHP, and WordPress dependencies
@@ -27,34 +27,29 @@ RUN apk add --no-cache \
     apache2=2.4.65-r0 \
     apache2-ssl=2.4.65-r0 \
     apache2-utils=2.4.65-r0 \
-    apache2-mod-rewrite=2.4.65-r0 \
-    apache2-mod-headers=2.4.65-r0 \
-    php84=${PHP_FULL_VERSION}-${PHP_RELEASE} \
-    php84-apache2=${PHP_FULL_VERSION}-${PHP_RELEASE} \
-    php84-mysqli=${PHP_FULL_VERSION}-${PHP_RELEASE} \
-    php84-pdo_mysql=${PHP_FULL_VERSION}-${PHP_RELEASE} \
-    php84-json=${PHP_FULL_VERSION}-${PHP_RELEASE} \
-    php84-openssl=${PHP_FULL_VERSION}-${PHP_RELEASE} \
-    php84-curl=${PHP_FULL_VERSION}-${PHP_RELEASE} \
-    php84-xml=${PHP_FULL_VERSION}-${PHP_RELEASE} \
-    php84-xmlwriter=${PHP_FULL_VERSION}-${PHP_RELEASE} \
-    php84-xmlreader=${PHP_FULL_VERSION}-${PHP_RELEASE} \
-    php84-simplexml=${PHP_FULL_VERSION}-${PHP_RELEASE} \
-    php84-dom=${PHP_FULL_VERSION}-${PHP_RELEASE} \
-    php84-mbstring=${PHP_FULL_VERSION}-${PHP_RELEASE} \
-    php84-gd=${PHP_FULL_VERSION}-${PHP_RELEASE} \
-    php84-intl=${PHP_FULL_VERSION}-${PHP_RELEASE} \
-    php84-zip=${PHP_FULL_VERSION}-${PHP_RELEASE} \
-    php84-fileinfo=${PHP_FULL_VERSION}-${PHP_RELEASE} \
-    php84-session=${PHP_FULL_VERSION}-${PHP_RELEASE} \
-    php84-iconv=${PHP_FULL_VERSION}-${PHP_RELEASE} \
-    php84-ctype=${PHP_FULL_VERSION}-${PHP_RELEASE} \
-    php84-filter=${PHP_FULL_VERSION}-${PHP_RELEASE} \
-    php84-hash=${PHP_FULL_VERSION}-${PHP_RELEASE} \
-    php84-tokenizer=${PHP_FULL_VERSION}-${PHP_RELEASE} \
-    php84-opcache=${PHP_FULL_VERSION}-${PHP_RELEASE} \
-    php84-exif=${PHP_FULL_VERSION}-${PHP_RELEASE} \
-    php84-pecl-imagick=${PHP_FULL_VERSION}-${PHP_RELEASE} \
+    php84=8.4.13-r0 \
+    php84-apache2=8.4.13-r0 \
+    php84-mysqli=8.4.13-r0 \
+    php84-pdo_mysql=8.4.13-r0 \
+    php84-openssl=8.4.13-r0 \
+    php84-curl=8.4.13-r0 \
+    php84-xml=8.4.13-r0 \
+    php84-xmlwriter=8.4.13-r0 \
+    php84-xmlreader=8.4.13-r0 \
+    php84-simplexml=8.4.13-r0 \
+    php84-dom=8.4.13-r0 \
+    php84-mbstring=8.4.13-r0 \
+    php84-gd=8.4.13-r0 \
+    php84-intl=8.4.13-r0 \
+    php84-zip=8.4.13-r0 \
+    php84-fileinfo=8.4.13-r0 \
+    php84-session=8.4.13-r0 \
+    php84-iconv=8.4.13-r0 \
+    php84-ctype=8.4.13-r0 \
+    php84-tokenizer=8.4.13-r0 \
+    php84-opcache=8.4.13-r0 \
+    php84-exif=8.4.13-r0 \
+    php84-pecl-imagick=3.8.0-r1 \
     wget \
     unzip \
     less \
@@ -63,11 +58,10 @@ RUN apk add --no-cache \
     && ln -sf /usr/bin/php84 /usr/bin/php \
     && rm -rf /var/cache/apk/*
 
-# Create users and groups
-RUN addgroup -g 1001 apache && \
-    adduser -D -u 1001 -G apache -s /bin/sh apache \
-    && addgroup -g 1002 www-data \
-    && adduser -D -u 1002 -G www-data -s /bin/sh www-data
+# Use existing system users (apache from Apache package, www-data from PHP package)
+# apache: UID=100, GID=101
+# www-data: GID=82 (group exists, add user)
+RUN adduser -D -u 1001 -G www-data -s /bin/sh www-data
 
 # Create directories and set permissions
 RUN mkdir -p /var/www/html \

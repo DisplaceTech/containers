@@ -23,10 +23,8 @@ RUN apk add --no-cache \
     php83-mysqli=8.3.26-r0 \
     php83-pdo=8.3.26-r0 \
     php83-pdo_mysql=8.3.26-r0 \
-    php83-json=8.3.26-r0 \
     php83-openssl=8.3.26-r0 \
     php83-curl=8.3.26-r0 \
-    php83-zlib=8.3.26-r0 \
     php83-xml=8.3.26-r0 \
     php83-xmlwriter=8.3.26-r0 \
     php83-xmlreader=8.3.26-r0 \
@@ -43,13 +41,10 @@ RUN apk add --no-cache \
     php83-iconv=8.3.26-r0 \
     php83-bcmath=8.3.26-r0 \
     php83-ctype=8.3.26-r0 \
-    php83-filter=8.3.26-r0 \
-    php83-hash=8.3.26-r0 \
-    php83-pcre=8.3.26-r0 \
     php83-posix=8.3.26-r0 \
     php83-sodium=8.3.26-r0 \
-    php83-redis=8.3.26-r0 \
-    php83-pecl-imagick=8.3.26-r0 \
+    php83-pecl-redis=6.2.0-r0 \
+    php83-pecl-imagick=3.8.0-r1 \
     curl \
     && rm -rf /var/cache/apk/*
 
@@ -57,9 +52,8 @@ RUN apk add --no-cache \
 RUN ln -sf /usr/bin/php83 /usr/bin/php \
     && ln -sf /usr/sbin/php-fpm83 /usr/sbin/php-fpm
 
-# Create non-root user
-RUN addgroup -g 1001 www-data && \
-    adduser -D -u 1001 -G www-data -s /bin/sh www-data
+# Create non-root user (www-data group already exists from PHP packages)
+RUN adduser -D -u 1001 -G www-data -s /bin/sh www-data
 
 # Create required directories
 RUN mkdir -p /var/log/php-fpm \
@@ -70,9 +64,9 @@ RUN mkdir -p /var/log/php-fpm \
                                   /var/www/html
 
 # Copy configuration files
-COPY php83.ini /etc/php83/php.ini
-COPY php-fpm83.conf /etc/php83/php-fpm.conf
-COPY www83.conf /etc/php83/php-fpm.d/www.conf
+COPY php.ini /etc/php83/php.ini
+COPY php-fpm.conf /etc/php83/php-fpm.conf
+COPY www.conf /etc/php83/php-fpm.d/www.conf
 
 # Create a simple PHP info page for testing
 RUN echo '<?php\n\

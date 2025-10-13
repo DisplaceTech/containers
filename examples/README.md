@@ -313,11 +313,11 @@ services:
       - wordpress2
 
   wordpress1:
-    image: ghcr.io/displace-technologies/wordpress:6.8.3-php8.4
+    image: ghcr.io/displacetech/wordpress:6.8.3-php8.4
     # ... config
 
   wordpress2:
-    image: ghcr.io/displace-technologies/wordpress:6.8.3-php8.4
+    image: ghcr.io/displacetech/wordpress:6.8.3-php8.4
     # ... config
 ```
 

@@ -1,20 +1,21 @@
+ARG ALPINE_VERSION=3.22
 ARG PHP_VERSION=8.3
-FROM alpine:3.22
+ARG PHP_FULL_VERSION=8.3.26
+ARG PHP_RELEASE=r0
+
+FROM alpine:${ALPINE_VERSION}
 
 # Metadata labels
 LABEL org.opencontainers.image.title="WordPress"
 LABEL org.opencontainers.image.description="WordPress 6.8.3 with PHP ${PHP_VERSION} and Apache on Alpine Linux"
 LABEL org.opencontainers.image.version="6.8.3-php${PHP_VERSION}"
 LABEL org.opencontainers.image.authors="Displace Technologies <hello@displace.tech>"
-LABEL org.opencontainers.image.url="https://github.com/displace-technologies/containers"
-LABEL org.opencontainers.image.documentation="https://github.com/displace-technologies/containers/tree/main/wordpress"
-LABEL org.opencontainers.image.source="https://github.com/displace-technologies/containers"
+LABEL org.opencontainers.image.url="https://github.com/displacetech/containers"
+LABEL org.opencontainers.image.documentation="https://github.com/displacetech/containers/tree/main/wordpress"
+LABEL org.opencontainers.image.source="https://github.com/displacetech/containers"
 LABEL org.opencontainers.image.vendor="Displace Technologies"
 LABEL org.opencontainers.image.licenses="MIT"
-LABEL org.opencontainers.image.base.name="alpine:3.22"
-
-# Set PHP version argument
-ARG PHP_VERSION=8.3
+LABEL org.opencontainers.image.base.name="alpine:${ALPINE_VERSION}"
 
 # WordPress and WP-CLI versions
 ENV WORDPRESS_VERSION=6.8.3
@@ -22,81 +23,44 @@ ENV WORDPRESS_SHA256=26b55ab0b1bb0b8ad5a1b21a70b45b4a2e17b7b6a2b98e1c8eaa3ff7e6b
 ENV WPCLI_VERSION=2.12.0
 
 # Install Apache, PHP, and WordPress dependencies
-RUN if [ "$PHP_VERSION" = "8.4" ]; then \
-        apk add --no-cache \
-            apache2=2.4.65-r0 \
-            apache2-ssl=2.4.65-r0 \
-            apache2-utils=2.4.65-r0 \
-            apache2-mod-rewrite=2.4.65-r0 \
-            apache2-mod-headers=2.4.65-r0 \
-            php84=8.4.13-r0 \
-            php84-apache2=8.4.13-r0 \
-            php84-mysqli=8.4.13-r0 \
-            php84-pdo_mysql=8.4.13-r0 \
-            php84-json=8.4.13-r0 \
-            php84-openssl=8.4.13-r0 \
-            php84-curl=8.4.13-r0 \
-            php84-xml=8.4.13-r0 \
-            php84-xmlwriter=8.4.13-r0 \
-            php84-xmlreader=8.4.13-r0 \
-            php84-simplexml=8.4.13-r0 \
-            php84-dom=8.4.13-r0 \
-            php84-mbstring=8.4.13-r0 \
-            php84-gd=8.4.13-r0 \
-            php84-intl=8.4.13-r0 \
-            php84-zip=8.4.13-r0 \
-            php84-fileinfo=8.4.13-r0 \
-            php84-session=8.4.13-r0 \
-            php84-iconv=8.4.13-r0 \
-            php84-ctype=8.4.13-r0 \
-            php84-filter=8.4.13-r0 \
-            php84-hash=8.4.13-r0 \
-            php84-tokenizer=8.4.13-r0 \
-            php84-opcache=8.4.13-r0 \
-            php84-exif=8.4.13-r0 \
-            php84-pecl-imagick=8.4.13-r0 \
-            && ln -sf /usr/bin/php84 /usr/bin/php; \
-    else \
-        apk add --no-cache \
-            apache2=2.4.65-r0 \
-            apache2-ssl=2.4.65-r0 \
-            apache2-utils=2.4.65-r0 \
-            apache2-mod-rewrite=2.4.65-r0 \
-            apache2-mod-headers=2.4.65-r0 \
-            php83=8.3.26-r0 \
-            php83-apache2=8.3.26-r0 \
-            php83-mysqli=8.3.26-r0 \
-            php83-pdo_mysql=8.3.26-r0 \
-            php83-json=8.3.26-r0 \
-            php83-openssl=8.3.26-r0 \
-            php83-curl=8.3.26-r0 \
-            php83-xml=8.3.26-r0 \
-            php83-xmlwriter=8.3.26-r0 \
-            php83-xmlreader=8.3.26-r0 \
-            php83-simplexml=8.3.26-r0 \
-            php83-dom=8.3.26-r0 \
-            php83-mbstring=8.3.26-r0 \
-            php83-gd=8.3.26-r0 \
-            php83-intl=8.3.26-r0 \
-            php83-zip=8.3.26-r0 \
-            php83-fileinfo=8.3.26-r0 \
-            php83-session=8.3.26-r0 \
-            php83-iconv=8.3.26-r0 \
-            php83-ctype=8.3.26-r0 \
-            php83-filter=8.3.26-r0 \
-            php83-hash=8.3.26-r0 \
-            php83-tokenizer=8.3.26-r0 \
-            php83-opcache=8.3.26-r0 \
-            php83-exif=8.3.26-r0 \
-            php83-pecl-imagick=8.3.26-r0 \
-            && ln -sf /usr/bin/php83 /usr/bin/php; \
-    fi \
-    && apk add --no-cache \
-        wget \
-        unzip \
-        less \
-        mysql-client \
-        curl \
+RUN apk add --no-cache \
+    apache2=2.4.65-r0 \
+    apache2-ssl=2.4.65-r0 \
+    apache2-utils=2.4.65-r0 \
+    apache2-mod-rewrite=2.4.65-r0 \
+    apache2-mod-headers=2.4.65-r0 \
+    php83=${PHP_FULL_VERSION}-${PHP_RELEASE} \
+    php83-apache2=${PHP_FULL_VERSION}-${PHP_RELEASE} \
+    php83-mysqli=${PHP_FULL_VERSION}-${PHP_RELEASE} \
+    php83-pdo_mysql=${PHP_FULL_VERSION}-${PHP_RELEASE} \
+    php83-json=${PHP_FULL_VERSION}-${PHP_RELEASE} \
+    php83-openssl=${PHP_FULL_VERSION}-${PHP_RELEASE} \
+    php83-curl=${PHP_FULL_VERSION}-${PHP_RELEASE} \
+    php83-xml=${PHP_FULL_VERSION}-${PHP_RELEASE} \
+    php83-xmlwriter=${PHP_FULL_VERSION}-${PHP_RELEASE} \
+    php83-xmlreader=${PHP_FULL_VERSION}-${PHP_RELEASE} \
+    php83-simplexml=${PHP_FULL_VERSION}-${PHP_RELEASE} \
+    php83-dom=${PHP_FULL_VERSION}-${PHP_RELEASE} \
+    php83-mbstring=${PHP_FULL_VERSION}-${PHP_RELEASE} \
+    php83-gd=${PHP_FULL_VERSION}-${PHP_RELEASE} \
+    php83-intl=${PHP_FULL_VERSION}-${PHP_RELEASE} \
+    php83-zip=${PHP_FULL_VERSION}-${PHP_RELEASE} \
+    php83-fileinfo=${PHP_FULL_VERSION}-${PHP_RELEASE} \
+    php83-session=${PHP_FULL_VERSION}-${PHP_RELEASE} \
+    php83-iconv=${PHP_FULL_VERSION}-${PHP_RELEASE} \
+    php83-ctype=${PHP_FULL_VERSION}-${PHP_RELEASE} \
+    php83-filter=${PHP_FULL_VERSION}-${PHP_RELEASE} \
+    php83-hash=${PHP_FULL_VERSION}-${PHP_RELEASE} \
+    php83-tokenizer=${PHP_FULL_VERSION}-${PHP_RELEASE} \
+    php83-opcache=${PHP_FULL_VERSION}-${PHP_RELEASE} \
+    php83-exif=${PHP_FULL_VERSION}-${PHP_RELEASE} \
+    php83-pecl-imagick=${PHP_FULL_VERSION}-${PHP_RELEASE} \
+    wget \
+    unzip \
+    less \
+    mysql-client \
+    curl \
+    && ln -sf /usr/bin/php83 /usr/bin/php \
     && rm -rf /var/cache/apk/*
 
 # Create users and groups

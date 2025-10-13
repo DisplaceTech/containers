@@ -6,7 +6,7 @@ version: '3.8'
 services:
   # WordPress with PHP 8.3 for development (more mature/stable)
   wordpress:
-    image: ghcr.io/displace-technologies/wordpress:6.8.3-php8.3
+    image: ghcr.io/displacetech/wordpress:6.8.3-php8.3
     ports:
       - "8080:8080"
     environment:
@@ -41,7 +41,7 @@ services:
 
   # MariaDB with development-friendly settings
   mariadb:
-    image: ghcr.io/displace-technologies/mariadb:latest
+    image: ghcr.io/displacetech/mariadb:latest
     ports:
       - "3306:3306"  # Exposed for external database tools
     environment:

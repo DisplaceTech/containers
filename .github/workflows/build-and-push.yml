@@ -35,7 +35,7 @@ on:
 
 env:
   REGISTRY: ghcr.io
-  REGISTRY_NAMESPACE: displace-technologies
+  REGISTRY_NAMESPACE: displacetech
 
 jobs:
   # Detect which containers have changed
@@ -355,7 +355,7 @@ jobs:
             echo "## Registry Information:" >> $GITHUB_STEP_SUMMARY
             echo "" >> $GITHUB_STEP_SUMMARY
             echo "- **Registry**: ${{ env.REGISTRY }}/${{ env.REGISTRY_NAMESPACE }}" >> $GITHUB_STEP_SUMMARY
-            echo "- **Available at**: https://github.com/orgs/displace-technologies/packages" >> $GITHUB_STEP_SUMMARY
+            echo "- **Available at**: https://github.com/orgs/displacetech/packages" >> $GITHUB_STEP_SUMMARY
           else
             echo "No container changes detected." >> $GITHUB_STEP_SUMMARY
           fi

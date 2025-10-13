@@ -4,8 +4,8 @@ Complete WordPress 6.8.3 installation with Apache and PHP, optimized for perform
 
 ## Available Versions
 
-- **WordPress 6.8.3 + PHP 8.4** - `ghcr.io/displace-technologies/wordpress:6.8.3-php8.4`
-- **WordPress 6.8.3 + PHP 8.3** - `ghcr.io/displace-technologies/wordpress:6.8.3-php8.3`
+- **WordPress 6.8.3 + PHP 8.4** - `ghcr.io/displacetech/wordpress:6.8.3-php8.4`
+- **WordPress 6.8.3 + PHP 8.3** - `ghcr.io/displacetech/wordpress:6.8.3-php8.3`
 
 Both versions include:
 - Apache 2.4.65 web server
@@ -22,7 +22,7 @@ docker run -d -p 8080:8080 \
   -e WORDPRESS_DB_NAME=wordpress \
   -e WORDPRESS_DB_USER=wpuser \
   -e WORDPRESS_DB_PASSWORD=wppass \
-  ghcr.io/displace-technologies/wordpress:6.8.3-php8.4
+  ghcr.io/displacetech/wordpress:6.8.3-php8.4
 
 # Run with auto-installation
 docker run -d -p 8080:8080 \
@@ -34,7 +34,7 @@ docker run -d -p 8080:8080 \
   -e WORDPRESS_ADMIN_USER=admin \
   -e WORDPRESS_ADMIN_PASSWORD=secure_password \
   -e WORDPRESS_ADMIN_EMAIL=admin@example.com \
-  ghcr.io/displace-technologies/wordpress:6.8.3-php8.4
+  ghcr.io/displacetech/wordpress:6.8.3-php8.4
 ```
 
 ## Features
@@ -111,7 +111,7 @@ docker run -d -p 8080:8080 \
 version: '3.8'
 services:
   wordpress:
-    image: ghcr.io/displace-technologies/wordpress:6.8.3-php8.4
+    image: ghcr.io/displacetech/wordpress:6.8.3-php8.4
     ports:
       - "8080:8080"
     environment:
@@ -136,7 +136,7 @@ services:
     restart: unless-stopped
 
   mariadb:
-    image: ghcr.io/displace-technologies/mariadb:latest
+    image: ghcr.io/displacetech/mariadb:latest
     environment:
       MYSQL_ROOT_PASSWORD: rootpassword
       MYSQL_DATABASE: wordpress
@@ -158,7 +158,7 @@ volumes:
 version: '3.8'
 services:
   wordpress:
-    image: ghcr.io/displace-technologies/wordpress:6.8.3-php8.4
+    image: ghcr.io/displacetech/wordpress:6.8.3-php8.4
     ports:
       - "8080:8080"
     environment:
@@ -265,7 +265,7 @@ docker run -d -p 8080:8080 \
   -e WORDPRESS_DEBUG_LOG=true \
   -v $(pwd)/wp-content:/var/www/html/wp-content \
   -e WORDPRESS_DB_HOST=mariadb \
-  ghcr.io/displace-technologies/wordpress:6.8.3-php8.4
+  ghcr.io/displacetech/wordpress:6.8.3-php8.4
 ```
 
 ### Production Setup
@@ -275,7 +275,7 @@ docker run -d -p 8080:8080 \
   -v wordpress_data:/var/www/html \
   -e WORDPRESS_DB_HOST=prod-db.internal:3306 \
   --restart=unless-stopped \
-  ghcr.io/displace-technologies/wordpress:6.8.3-php8.4
+  ghcr.io/displacetech/wordpress:6.8.3-php8.4
 ```
 
 ## Troubleshooting
@@ -308,7 +308,7 @@ Enable debug logging for troubleshooting:
 docker run -d -p 8080:8080 \
   -e WORDPRESS_DEBUG=true \
   -e WORDPRESS_DEBUG_LOG=true \
-  ghcr.io/displace-technologies/wordpress:6.8.3-php8.4
+  ghcr.io/displacetech/wordpress:6.8.3-php8.4
 ```
 
 Then check debug logs:

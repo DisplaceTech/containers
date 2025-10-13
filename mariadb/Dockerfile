@@ -1,0 +1,78 @@
+FROM alpine:3.22
+
+# Metadata labels
+LABEL org.opencontainers.image.title="MariaDB Server"
+LABEL org.opencontainers.image.description="MariaDB Server on Alpine Linux optimized for WordPress"
+LABEL org.opencontainers.image.version="11.5"
+LABEL org.opencontainers.image.authors="Displace Technologies <hello@displace.tech>"
+LABEL org.opencontainers.image.url="https://github.com/displace-technologies/containers"
+LABEL org.opencontainers.image.documentation="https://github.com/displace-technologies/containers/tree/main/mariadb"
+LABEL org.opencontainers.image.source="https://github.com/displace-technologies/containers"
+LABEL org.opencontainers.image.vendor="Displace Technologies"
+LABEL org.opencontainers.image.licenses="MIT"
+LABEL org.opencontainers.image.base.name="alpine:3.22"
+
+# Install MariaDB and required packages
+RUN apk add --no-cache \
+    mariadb \
+    mariadb-client \
+    mariadb-server-utils \
+    pwgen \
+    tzdata \
+    && rm -rf /var/cache/apk/*
+
+# Create non-root user for MariaDB
+RUN addgroup -g 1001 mysql && \
+    adduser -D -u 1001 -G mysql -s /bin/sh mysql
+
+# Create required directories and set permissions
+RUN mkdir -p /var/lib/mysql \
+             /var/log/mysql \
+             /run/mysqld \
+             /docker-entrypoint-initdb.d \
+    && chown -R mysql:mysql /var/lib/mysql \
+                            /var/log/mysql \
+                            /run/mysqld \
+    && chmod 755 /docker-entrypoint-initdb.d
+
+# Copy configuration files
+COPY my.cnf /etc/my.cnf.d/custom.cnf
+COPY docker-entrypoint.sh /usr/local/bin/
+RUN chmod +x /usr/local/bin/docker-entrypoint.sh
+
+# Switch to mysql user for initialization
+USER mysql
+
+# Initialize MariaDB data directory
+RUN mariadb-install-db --user=mysql --datadir=/var/lib/mysql --skip-test-db
+
+# Back to root for final setup
+USER root
+
+# Set proper ownership one more time
+RUN chown -R mysql:mysql /var/lib/mysql /var/log/mysql /run/mysqld
+
+# Environment variables with defaults
+ENV MYSQL_ROOT_PASSWORD=""
+ENV MYSQL_DATABASE=""
+ENV MYSQL_USER=""
+ENV MYSQL_PASSWORD=""
+ENV MYSQL_ALLOW_EMPTY_PASSWORD="no"
+ENV MYSQL_RANDOM_ROOT_PASSWORD="no"
+
+# Expose MySQL port
+EXPOSE 3306
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=30s --retries=3 \
+    CMD mariadb-admin ping -h localhost || exit 1
+
+# Data volume
+VOLUME ["/var/lib/mysql"]
+
+# Switch back to mysql user for runtime
+USER mysql
+
+# Entry point
+ENTRYPOINT ["docker-entrypoint.sh"]
+CMD ["mariadbd", "--user=mysql"]

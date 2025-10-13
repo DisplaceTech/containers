@@ -226,7 +226,7 @@ query_cache_size = 0
 
 ## Security Features
 
-- **Non-root execution**: Runs as user `mysql` (UID/GID 1001)
+- **Non-root execution**: Runs as user `mysql` (UID 100/GID 101)
 - **Secure defaults**: Anonymous users and test database removed
 - **Network security**: Configurable bind address
 - **Password requirements**: Strong password enforcement options

@@ -99,7 +99,7 @@ To enable HTTPS:
 
 ## Security Features
 
-- **Non-root execution**: Runs as user `apache` (UID/GID 1001)
+- **Non-root execution**: Runs as user `apache` (UID 100/GID 101)
 - **Security headers**: X-Content-Type-Options, X-Frame-Options, etc.
 - **Minimal modules**: Only essential modules loaded
 - **File access restrictions**: Sensitive files blocked by default
@@ -184,8 +184,8 @@ LoadModule proxy_http_module modules/mod_proxy_http.so
 ### Common Issues
 
 1. **Permission denied errors**
-   - Ensure volume permissions allow access by user ID 1001
-   - Check: `chown -R 1001:1001 /path/to/html`
+   - Ensure volume permissions allow access by user ID 100
+   - Check: `chown -R 100:101 /path/to/html`
 
 2. **SSL certificate errors**
    - Verify certificate paths in virtual host configuration

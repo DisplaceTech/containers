@@ -215,7 +215,7 @@ post_max_size = 100M
 
 ## Security Features
 
-- **Non-root execution**: Runs as user `www-data` (UID/GID 1001)
+- **Non-root execution**: Runs as user `www-data` (UID 1001/GID 82)
 - **Function restrictions**: Dangerous functions disabled
 - **Session security**: Secure session cookie settings
 - **File upload limits**: Reasonable upload size limits
@@ -305,7 +305,7 @@ Both PHP versions are configured identically and should be drop-in replacements 
 1. **Permission errors**
    ```bash
    # Fix file permissions
-   chown -R 1001:1001 /path/to/html
+   chown -R 1001:82 /path/to/html
    ```
 
 2. **Memory limit exceeded**

@@ -73,9 +73,7 @@ build-apache: ## Build Apache container
 		--build-arg APACHE_VERSION=$(APACHE_VERSION) \
 		--build-arg APACHE_RELEASE=$(APACHE_RELEASE) \
 		$(BUILD_ARGS) \
-		-t $(REGISTRY)/$(REGISTRY_NAMESPACE)/apache:latest \
-		-t $(REGISTRY)/$(REGISTRY_NAMESPACE)/apache:2.4 \
-		-t $(REGISTRY)/$(REGISTRY_NAMESPACE)/apache:$(APACHE_VERSION) \
+	-t $(REGISTRY)/$(REGISTRY_NAMESPACE)/apache:latest \
 		containers/apache/2.4/
 	$(call print_success,"Apache container built")
 
@@ -92,8 +90,7 @@ build-php-fpm-83: ## Build PHP-FPM 8.3 container
 		--build-arg PHP_FULL_VERSION=$(PHP83_FULL_VERSION) \
 		--build-arg PHP_RELEASE=$(PHP_RELEASE) \
 		$(BUILD_ARGS) \
-		-t $(REGISTRY)/$(REGISTRY_NAMESPACE)/php-fpm:8.3 \
-		-t $(REGISTRY)/$(REGISTRY_NAMESPACE)/php-fpm:$(PHP83_FULL_VERSION) \
+	-t $(REGISTRY)/$(REGISTRY_NAMESPACE)/php-fpm:8.3 \
 		containers/php-fpm/8.3/
 	$(call print_success,"PHP-FPM 8.3 container built")
 
@@ -107,9 +104,8 @@ build-php-fpm-84: ## Build PHP-FPM 8.4 container (latest)
 		--build-arg PHP_FULL_VERSION=$(PHP84_FULL_VERSION) \
 		--build-arg PHP_RELEASE=$(PHP_RELEASE) \
 		$(BUILD_ARGS) \
-		-t $(REGISTRY)/$(REGISTRY_NAMESPACE)/php-fpm:latest \
-		-t $(REGISTRY)/$(REGISTRY_NAMESPACE)/php-fpm:8.4 \
-		-t $(REGISTRY)/$(REGISTRY_NAMESPACE)/php-fpm:$(PHP84_FULL_VERSION) \
+	-t $(REGISTRY)/$(REGISTRY_NAMESPACE)/php-fpm:latest \
+	-t $(REGISTRY)/$(REGISTRY_NAMESPACE)/php-fpm:8.4 \
 		containers/php-fpm/8.4/
 	$(call print_success,"PHP-FPM 8.4 container built")
 
@@ -120,9 +116,7 @@ build-mariadb: ## Build MariaDB container
 		--platform $(PLATFORM) \
 		--build-arg ALPINE_VERSION=$(ALPINE_VERSION) \
 		$(BUILD_ARGS) \
-		-t $(REGISTRY)/$(REGISTRY_NAMESPACE)/mariadb:latest \
-		-t $(REGISTRY)/$(REGISTRY_NAMESPACE)/mariadb:11 \
-		-t $(REGISTRY)/$(REGISTRY_NAMESPACE)/mariadb:$(MARIADB_VERSION) \
+	-t $(REGISTRY)/$(REGISTRY_NAMESPACE)/mariadb:latest \
 		containers/mariadb/11.5/
 	$(call print_success,"MariaDB container built")
 

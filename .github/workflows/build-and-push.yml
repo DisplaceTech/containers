@@ -268,21 +268,37 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
+      - name: Create WordPress package if it doesn't exist
+        if: github.event_name != 'pull_request'
+        run: |
+          # Try to create the package with public visibility
+          curl -X POST \
+            -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+            -H "Accept: application/vnd.github.v3+json" \
+            "https://api.github.com/orgs/displacetech/packages/container/wordpress" \
+            -d '{"name":"wordpress","visibility":"public"}' || echo "Package might already exist or creation failed - continuing..."
+
       - name: Extract metadata for WordPress ${{ matrix.wordpress_version }}-php${{ matrix.php_version }}
         id: meta
         uses: docker/metadata-action@v5
         with:
           images: ${{ env.REGISTRY }}/${{ env.REGISTRY_NAMESPACE }}/wordpress
           tags: |
-            type=ref,event=branch,suffix=-${{ matrix.wordpress_version }}-php${{ matrix.php_version }}
-            type=ref,event=pr,suffix=-${{ matrix.wordpress_version }}-php${{ matrix.php_version }}
+            type=ref,event=branch
+            type=ref,event=pr
             type=raw,value=${{ matrix.wordpress_version }}-php${{ matrix.php_version }},enable={{is_default_branch}}
+
+      - name: Debug WordPress tags
+        run: |
+          echo "Tags to be used: ${{ steps.meta.outputs.tags }}"
+          echo "Labels to be used: ${{ steps.meta.outputs.labels }}"
+          echo "Push enabled: ${{ github.event_name != 'pull_request' && (github.event.inputs.push_images != 'false') }}"
 
       - name: Build and push WordPress ${{ matrix.wordpress_version }}-php${{ matrix.php_version }} image
         uses: docker/build-push-action@v5
         with:
           context: ./containers/wordpress/${{ matrix.wordpress_version }}-php${{ matrix.php_version }}
-          platforms: linux/amd64,linux/arm64
+          platforms: linux/amd64
           push: ${{ github.event_name != 'pull_request' && (github.event.inputs.push_images != 'false') }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}

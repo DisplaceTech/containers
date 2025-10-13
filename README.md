@@ -112,8 +112,9 @@ Your WordPress site will be available at http://localhost:8080
 ## Examples and Documentation
 
 - [Docker Compose Examples](./examples/) - Complete stack configurations
-- [Individual Container Docs](./docs/) - Detailed usage for each image
-- [GitHub Actions](./github/workflows/) - CI/CD pipeline details
+- [Individual Container Docs](./containers/) - Detailed usage for each image
+- [Dependency Management](./docs/DEPENDENCY_MANAGEMENT.md) - Scaling strategy for automated updates
+- [GitHub Actions](./.github/workflows/) - CI/CD pipeline details
 
 ## Contributing
 
@@ -187,7 +188,3 @@ For questions, issues, or contributions:
 - 📝 [Create an Issue](https://github.com/displacetech/containers/issues)
 - 💬 [Start a Discussion](https://github.com/displacetech/containers/discussions)
 - 🌐 [Visit Our Website](https://displace.tech)
-
----
-
-**Built with ❤️ by [Displace Technologies](https://displace.tech)**

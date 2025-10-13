@@ -1,0 +1,39 @@
+# WP-CLI Configuration for WordPress Container
+# Displace Technologies Container Library
+
+# Core settings
+core download:
+  locale: en_US
+  version: latest
+
+# Server settings
+server:
+  host: 0.0.0.0
+  port: 8080
+
+# Cache settings
+cache:
+  driver: apcu
+
+# Database settings
+db:
+  charset: utf8mb4
+  collate: utf8mb4_unicode_ci
+
+# Path settings
+path: /var/www/html
+
+# User settings
+user: www-data
+
+# Skip WordPress version check
+skip-plugins: []
+skip-themes: []
+
+# Package settings
+package:
+  require_wp_cli: ">=2.5"
+
+# Debug settings
+debug: false
+quiet: false

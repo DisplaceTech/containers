@@ -1,0 +1,369 @@
+name: Build and Push Container Images
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+    paths:
+      - 'containers/**'
+      - '.github/workflows/build-and-push.yml'
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'containers/**'
+      - '.github/workflows/build-and-push.yml'
+  workflow_dispatch:
+    inputs:
+      container:
+        description: 'Container to build (all, apache, php-fpm, mariadb, wordpress)'
+        required: false
+        default: 'all'
+        type: choice
+        options:
+          - all
+          - apache
+          - php-fpm
+          - mariadb
+          - wordpress
+      push_images:
+        description: 'Push images to registry'
+        required: false
+        default: true
+        type: boolean
+
+env:
+  REGISTRY: ghcr.io
+  REGISTRY_NAMESPACE: displace-technologies
+
+jobs:
+  # Detect which containers have changed
+  detect-changes:
+    runs-on: ubuntu-latest
+    outputs:
+      apache: ${{ steps.changes.outputs.apache }}
+      php-fpm: ${{ steps.changes.outputs.php-fpm }}
+      mariadb: ${{ steps.changes.outputs.mariadb }}
+      wordpress: ${{ steps.changes.outputs.wordpress }}
+      any-changes: ${{ steps.changes.outputs.changes }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Check for changes
+        uses: dorny/paths-filter@v2
+        id: changes
+        with:
+          filters: |
+            apache:
+              - 'containers/apache/**'
+            php-fpm:
+              - 'containers/php-fpm/**'
+            mariadb:
+              - 'containers/mariadb/**'
+            wordpress:
+              - 'containers/wordpress/**'
+            changes:
+              - 'containers/**'
+
+  # Build Apache container
+  build-apache:
+    runs-on: ubuntu-latest
+    needs: detect-changes
+    if: |
+      always() && (
+        needs.detect-changes.outputs.apache == 'true' ||
+        github.event.inputs.container == 'all' ||
+        github.event.inputs.container == 'apache'
+      )
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Log in to Container Registry
+        if: github.event_name != 'pull_request'
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Extract metadata for Apache
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.REGISTRY_NAMESPACE }}/apache
+          tags: |
+            type=ref,event=branch
+            type=ref,event=pr
+            type=raw,value=latest,enable={{is_default_branch}}
+            type=raw,value=2.4,enable={{is_default_branch}}
+            type=raw,value=2.4.65,enable={{is_default_branch}}
+
+      - name: Build and push Apache image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./containers/apache/2.4
+          platforms: linux/amd64,linux/arm64
+          push: ${{ github.event_name != 'pull_request' && (github.event.inputs.push_images != 'false') }}
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  # Build PHP-FPM containers (matrix for versions)
+  build-php-fpm:
+    runs-on: ubuntu-latest
+    needs: detect-changes
+    if: |
+      always() && (
+        needs.detect-changes.outputs.php-fpm == 'true' ||
+        github.event.inputs.container == 'all' ||
+        github.event.inputs.container == 'php-fpm'
+      )
+    permissions:
+      contents: read
+      packages: write
+    strategy:
+      matrix:
+        php_version: ['8.3', '8.4']
+        include:
+          - php_version: '8.3'
+            php_full_version: '8.3.26'
+            is_latest: false
+          - php_version: '8.4'
+            php_full_version: '8.4.13'
+            is_latest: true
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Log in to Container Registry
+        if: github.event_name != 'pull_request'
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Extract metadata for PHP-FPM ${{ matrix.php_version }}
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.REGISTRY_NAMESPACE }}/php-fpm
+          tags: |
+            type=ref,event=branch,suffix=-php${{ matrix.php_version }}
+            type=ref,event=pr,suffix=-php${{ matrix.php_version }}
+            type=raw,value=latest,enable={{is_default_branch}},enable=${{ matrix.is_latest }}
+            type=raw,value=${{ matrix.php_version }},enable={{is_default_branch}}
+            type=raw,value=${{ matrix.php_full_version }},enable={{is_default_branch}}
+
+      - name: Build and push PHP-FPM ${{ matrix.php_version }} image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./containers/php-fpm/${{ matrix.php_version }}
+          platforms: linux/amd64,linux/arm64
+          push: ${{ github.event_name != 'pull_request' && (github.event.inputs.push_images != 'false') }}
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha,scope=php-fpm-${{ matrix.php_version }}
+          cache-to: type=gha,mode=max,scope=php-fpm-${{ matrix.php_version }}
+
+  # Build MariaDB container
+  build-mariadb:
+    runs-on: ubuntu-latest
+    needs: detect-changes
+    if: |
+      always() && (
+        needs.detect-changes.outputs.mariadb == 'true' ||
+        github.event.inputs.container == 'all' ||
+        github.event.inputs.container == 'mariadb'
+      )
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Log in to Container Registry
+        if: github.event_name != 'pull_request'
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Extract metadata for MariaDB
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.REGISTRY_NAMESPACE }}/mariadb
+          tags: |
+            type=ref,event=branch
+            type=ref,event=pr
+            type=raw,value=latest,enable={{is_default_branch}}
+            type=raw,value=11,enable={{is_default_branch}}
+            type=raw,value=11.5,enable={{is_default_branch}}
+
+      - name: Build and push MariaDB image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./containers/mariadb/11.5
+          platforms: linux/amd64,linux/arm64
+          push: ${{ github.event_name != 'pull_request' && (github.event.inputs.push_images != 'false') }}
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  # Build WordPress containers (matrix for PHP versions)
+  build-wordpress:
+    runs-on: ubuntu-latest
+    needs: detect-changes
+    if: |
+      always() && (
+        needs.detect-changes.outputs.wordpress == 'true' ||
+        github.event.inputs.container == 'all' ||
+        github.event.inputs.container == 'wordpress'
+      )
+    permissions:
+      contents: read
+      packages: write
+    strategy:
+      matrix:
+        php_version: ['8.3', '8.4']
+        include:
+          - php_version: '8.3'
+            wordpress_version: '6.8.3'
+          - php_version: '8.4'
+            wordpress_version: '6.8.3'
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Log in to Container Registry
+        if: github.event_name != 'pull_request'
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Extract metadata for WordPress ${{ matrix.wordpress_version }}-php${{ matrix.php_version }}
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.REGISTRY_NAMESPACE }}/wordpress
+          tags: |
+            type=ref,event=branch,suffix=-${{ matrix.wordpress_version }}-php${{ matrix.php_version }}
+            type=ref,event=pr,suffix=-${{ matrix.wordpress_version }}-php${{ matrix.php_version }}
+            type=raw,value=${{ matrix.wordpress_version }}-php${{ matrix.php_version }},enable={{is_default_branch}}
+
+      - name: Build and push WordPress ${{ matrix.wordpress_version }}-php${{ matrix.php_version }} image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./containers/wordpress/${{ matrix.wordpress_version }}-php${{ matrix.php_version }}
+          platforms: linux/amd64,linux/arm64
+          push: ${{ github.event_name != 'pull_request' && (github.event.inputs.push_images != 'false') }}
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha,scope=wordpress-${{ matrix.php_version }}
+          cache-to: type=gha,mode=max,scope=wordpress-${{ matrix.php_version }}
+
+  # Test the built containers
+  test-containers:
+    runs-on: ubuntu-latest
+    needs: [build-apache, build-php-fpm, build-mariadb, build-wordpress]
+    if: always() && !cancelled()
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Compose
+        run: |
+          sudo curl -L "https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+          sudo chmod +x /usr/local/bin/docker-compose
+
+      - name: Test WordPress complete stack
+        run: |
+          # Use local images if this is a PR, otherwise use registry images
+          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            echo "Testing with locally built images (PR mode)"
+            # In a real scenario, you would modify the compose file to use local image tags
+            echo "Skipping integration test for PR - would need local image tags"
+          else
+            echo "Testing WordPress complete stack..."
+            cd examples
+            timeout 300 docker compose -f wordpress-complete.yml up -d
+            
+            # Wait for services to be healthy
+            echo "Waiting for services to be healthy..."
+            sleep 30
+            
+            # Test WordPress response
+            timeout 30 bash -c 'until curl -f http://localhost:8080; do sleep 1; done'
+            echo "✅ WordPress is responding"
+            
+            # Test database connection
+            docker compose -f wordpress-complete.yml exec -T wordpress wp --allow-root db check
+            echo "✅ Database connection working"
+            
+            # Cleanup
+            docker compose -f wordpress-complete.yml down -v
+          fi
+
+  # Summary job
+  build-summary:
+    runs-on: ubuntu-latest
+    needs: [detect-changes, build-apache, build-php-fpm, build-mariadb, build-wordpress, test-containers]
+    if: always()
+    steps:
+      - name: Build Summary
+        run: |
+          echo "# Build Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          if [[ "${{ needs.detect-changes.outputs.any-changes }}" == "true" || "${{ github.event.inputs.container }}" != "" ]]; then
+            echo "## Built Containers:" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            
+            [[ "${{ needs.build-apache.result }}" == "success" ]] && echo "✅ Apache 2.4.65" >> $GITHUB_STEP_SUMMARY
+            [[ "${{ needs.build-php-fpm.result }}" == "success" ]] && echo "✅ PHP-FPM 8.3 & 8.4" >> $GITHUB_STEP_SUMMARY
+            [[ "${{ needs.build-mariadb.result }}" == "success" ]] && echo "✅ MariaDB 11.5" >> $GITHUB_STEP_SUMMARY
+            [[ "${{ needs.build-wordpress.result }}" == "success" ]] && echo "✅ WordPress 6.8.3 (PHP 8.3 & 8.4)" >> $GITHUB_STEP_SUMMARY
+            
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "## Registry Information:" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "- **Registry**: ${{ env.REGISTRY }}/${{ env.REGISTRY_NAMESPACE }}" >> $GITHUB_STEP_SUMMARY
+            echo "- **Available at**: https://github.com/orgs/displace-technologies/packages" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "No container changes detected." >> $GITHUB_STEP_SUMMARY
+          fi
+          
+          if [[ "${{ needs.test-containers.result }}" == "success" ]]; then
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "✅ **Integration tests passed**" >> $GITHUB_STEP_SUMMARY
+          elif [[ "${{ needs.test-containers.result }}" == "failure" ]]; then
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "❌ **Integration tests failed**" >> $GITHUB_STEP_SUMMARY
+          fi

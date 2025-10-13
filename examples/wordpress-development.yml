@@ -1,0 +1,80 @@
+# WordPress Development Stack - Displace Technologies Container Library
+# This example provides a development-friendly WordPress setup with debugging enabled
+
+version: '3.8'
+
+services:
+  # WordPress with PHP 8.3 for development (more mature/stable)
+  wordpress:
+    image: ghcr.io/displace-technologies/wordpress:6.8.3-php8.3
+    ports:
+      - "8080:8080"
+    environment:
+      # Database configuration
+      WORDPRESS_DB_HOST: mariadb
+      WORDPRESS_DB_NAME: wordpress_dev
+      WORDPRESS_DB_USER: developer
+      WORDPRESS_DB_PASSWORD: devpass123
+      WORDPRESS_TABLE_PREFIX: wpdev_
+      
+      # Development settings
+      WORDPRESS_DEBUG: "true"
+      WORDPRESS_DEBUG_LOG: "true"
+      
+      # Auto-install for quick development setup
+      WORDPRESS_AUTO_INSTALL: "true"
+      WORDPRESS_URL: http://localhost:8080
+      WORDPRESS_TITLE: "WordPress Development Site"
+      WORDPRESS_ADMIN_USER: dev
+      WORDPRESS_ADMIN_PASSWORD: devpass123
+      WORDPRESS_ADMIN_EMAIL: dev@localhost.test
+    volumes:
+      # Mount current directory for theme/plugin development
+      - ./wp-content:/var/www/html/wp-content
+      - ./uploads:/var/www/html/wp-content/uploads
+      # Mount logs for debugging
+      - ./logs/apache:/var/log/apache2
+      - ./logs/wordpress:/var/www/html/wp-content/debug.log
+    depends_on:
+      - mariadb
+    restart: unless-stopped
+
+  # MariaDB with development-friendly settings
+  mariadb:
+    image: ghcr.io/displace-technologies/mariadb:latest
+    ports:
+      - "3306:3306"  # Exposed for external database tools
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpass123
+      MYSQL_DATABASE: wordpress_dev
+      MYSQL_USER: developer
+      MYSQL_PASSWORD: devpass123
+    volumes:
+      - mariadb_dev_data:/var/lib/mysql
+      - ./logs/mariadb:/var/log/mysql
+      # Optional: Development database initialization
+      - ./dev-db-init:/docker-entrypoint-initdb.d:ro
+    restart: unless-stopped
+    command: --general-log=1 --general-log-file=/var/log/mysql/general.log
+
+  # PHPMyAdmin for database management (development only)
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin:latest
+    ports:
+      - "8081:80"
+    environment:
+      PMA_HOST: mariadb
+      PMA_USER: developer
+      PMA_PASSWORD: devpass123
+      MYSQL_ROOT_PASSWORD: rootpass123
+    depends_on:
+      - mariadb
+    restart: unless-stopped
+
+volumes:
+  mariadb_dev_data:
+    driver: local
+
+networks:
+  default:
+    name: wordpress_dev_network

@@ -441,10 +441,22 @@ jobs:
             echo "No container changes detected." >> $GITHUB_STEP_SUMMARY
           fi
           
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "## Test Results:" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
           if [[ "${{ needs.test-containers.result }}" == "success" ]]; then
-            echo "" >> $GITHUB_STEP_SUMMARY
-            echo "✅ **Integration tests passed**" >> $GITHUB_STEP_SUMMARY
+            echo "✅ **Container health checks passed**" >> $GITHUB_STEP_SUMMARY
           elif [[ "${{ needs.test-containers.result }}" == "failure" ]]; then
-            echo "" >> $GITHUB_STEP_SUMMARY
-            echo "❌ **Integration tests failed**" >> $GITHUB_STEP_SUMMARY
+            echo "❌ **Container health checks failed**" >> $GITHUB_STEP_SUMMARY
+          elif [[ "${{ needs.test-containers.result }}" == "skipped" ]]; then
+            echo "⏸️ **Container health checks skipped**" >> $GITHUB_STEP_SUMMARY
+          fi
+          
+          if [[ "${{ needs.test-wordpress-stack.result }}" == "success" ]]; then
+            echo "✅ **WordPress integration tests passed**" >> $GITHUB_STEP_SUMMARY
+          elif [[ "${{ needs.test-wordpress-stack.result }}" == "failure" ]]; then
+            echo "❌ **WordPress integration tests failed**" >> $GITHUB_STEP_SUMMARY
+          elif [[ "${{ needs.test-wordpress-stack.result }}" == "skipped" ]]; then
+            echo "⏸️ **WordPress integration tests skipped**" >> $GITHUB_STEP_SUMMARY
           fi

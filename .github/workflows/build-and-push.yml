@@ -106,6 +106,7 @@ jobs:
             type=ref,event=branch
             type=ref,event=pr
             type=raw,value=latest,enable={{is_default_branch}}
+            type=raw,value=2.4,enable={{is_default_branch}}
 
       - name: Build and push Apache image
         uses: docker/build-push-action@v5
@@ -166,6 +167,7 @@ jobs:
             type=ref,event=pr,suffix=-php${{ matrix.php_version }}
             type=raw,value=latest,enable={{is_default_branch}},enable=${{ matrix.is_latest }}
             type=raw,value=${{ matrix.php_version }},enable={{is_default_branch}}
+            type=raw,value=${{ matrix.php_full_version }},enable={{is_default_branch}}
 
       - name: Build and push PHP-FPM ${{ matrix.php_version }} image
         uses: docker/build-push-action@v5
@@ -215,6 +217,7 @@ jobs:
             type=ref,event=branch
             type=ref,event=pr
             type=raw,value=latest,enable={{is_default_branch}}
+            type=raw,value=11,enable={{is_default_branch}}
 
       - name: Build and push MariaDB image
         uses: docker/build-push-action@v5
@@ -263,23 +266,6 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      - name: Create WordPress package if it doesn't exist
-        if: github.event_name != 'pull_request'
-        run: |
-          # Try to check if package exists first
-          echo "Checking if WordPress package exists..."
-          PACKAGE_EXISTS=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
-            -H "Accept: application/vnd.github.v3+json" \
-            "https://api.github.com/orgs/DisplaceTech/packages/container/wordpress" | grep -q '"name"' && echo "exists" || echo "not_found")
-          
-          echo "Package status: $PACKAGE_EXISTS"
-          
-          if [ "$PACKAGE_EXISTS" = "not_found" ]; then
-            echo "Package does not exist, this will be created on first push"
-          else
-            echo "Package already exists"
-          fi
-
       - name: Extract metadata for WordPress ${{ matrix.wordpress_version }}-php${{ matrix.php_version }}
         id: meta
         uses: docker/metadata-action@v5
@@ -289,21 +275,6 @@ jobs:
             type=ref,event=branch
             type=ref,event=pr
             type=raw,value=${{ matrix.wordpress_version }}-php${{ matrix.php_version }},enable={{is_default_branch}}
-
-      - name: Debug WordPress build context
-        run: |
-          echo "=== WordPress Build Debug ==="
-          echo "Repository: ${{ github.repository }}"
-          echo "Actor: ${{ github.actor }}"
-          echo "Registry: ${{ env.REGISTRY }}/${{ env.REGISTRY_NAMESPACE }}"
-          echo "WordPress version: ${{ matrix.wordpress_version }}"
-          echo "PHP version: ${{ matrix.php_version }}"
-          echo "Context path: ./containers/wordpress/${{ matrix.wordpress_version }}-php${{ matrix.php_version }}"
-          echo "Tags to be used: ${{ steps.meta.outputs.tags }}"
-          echo "Labels to be used: ${{ steps.meta.outputs.labels }}"
-          echo "Push enabled: ${{ github.event_name != 'pull_request' && (github.event.inputs.push_images != 'false') }}"
-          echo "Event name: ${{ github.event_name }}"
-          echo "============================="
 
       - name: Build and push WordPress ${{ matrix.wordpress_version }}-php${{ matrix.php_version }} image
         uses: docker/build-push-action@v5

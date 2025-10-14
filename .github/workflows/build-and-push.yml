@@ -49,12 +49,12 @@ jobs:
       any-changes: ${{ steps.changes.outputs.changes }}
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           fetch-depth: 0
 
       - name: Check for changes
-        uses: dorny/paths-filter@v2
+        uses: dorny/paths-filter@v3
         id: changes
         with:
           filters: |
@@ -84,7 +84,7 @@ jobs:
       packages: write
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Log in to Container Registry
         if: github.event_name != 'pull_request'
@@ -109,7 +109,7 @@ jobs:
             type=raw,value=2.4,enable={{is_default_branch}}
 
       - name: Build and push Apache image
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v6
         with:
           context: ./containers/apache/2.4
           platforms: linux/amd64,linux/arm64
@@ -144,7 +144,7 @@ jobs:
             is_latest: true
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Log in to Container Registry
         if: github.event_name != 'pull_request'
@@ -170,7 +170,7 @@ jobs:
             type=raw,value=${{ matrix.php_full_version }},enable={{is_default_branch}}
 
       - name: Build and push PHP-FPM ${{ matrix.php_version }} image
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v6
         with:
           context: ./containers/php-fpm/${{ matrix.php_version }}
           platforms: linux/amd64,linux/arm64
@@ -195,7 +195,7 @@ jobs:
       packages: write
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Log in to Container Registry
         if: github.event_name != 'pull_request'
@@ -220,7 +220,7 @@ jobs:
             type=raw,value=11,enable={{is_default_branch}}
 
       - name: Build and push MariaDB image
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v6
         with:
           context: ./containers/mariadb/11.5
           platforms: linux/amd64,linux/arm64
@@ -253,7 +253,7 @@ jobs:
             wordpress_version: '6.8.3'
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Log in to Container Registry
         if: github.event_name != 'pull_request'
@@ -277,7 +277,7 @@ jobs:
             type=raw,value=${{ matrix.wordpress_version }}-php${{ matrix.php_version }},enable={{is_default_branch}}
 
       - name: Build and push WordPress ${{ matrix.wordpress_version }}-php${{ matrix.php_version }} image
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v6
         with:
           context: ./containers/wordpress/${{ matrix.wordpress_version }}-php${{ matrix.php_version }}
           platforms: linux/amd64,linux/arm64
@@ -294,7 +294,7 @@ jobs:
     if: always() && !cancelled()
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Set up Docker Compose
         run: |

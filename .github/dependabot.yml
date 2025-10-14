@@ -1,0 +1,109 @@
+version: 2
+updates:
+  # Monitor Apache Dockerfiles
+  - package-ecosystem: "docker"
+    directory: "/containers/apache/2.4"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    open-pull-requests-limit: 5
+    labels:
+      - "dependencies"
+      - "docker"
+      - "apache"
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-patch"]
+
+  # Monitor PHP-FPM 8.3 Dockerfiles
+  - package-ecosystem: "docker"
+    directory: "/containers/php-fpm/8.3"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    open-pull-requests-limit: 5
+    labels:
+      - "dependencies"
+      - "docker"
+      - "php-fpm"
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-patch"]
+
+  # Monitor PHP-FPM 8.4 Dockerfiles
+  - package-ecosystem: "docker"
+    directory: "/containers/php-fpm/8.4"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    open-pull-requests-limit: 5
+    labels:
+      - "dependencies"
+      - "docker"
+      - "php-fpm"
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-patch"]
+
+  # Monitor MariaDB Dockerfiles
+  - package-ecosystem: "docker"
+    directory: "/containers/mariadb/11.5"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    open-pull-requests-limit: 5
+    labels:
+      - "dependencies"
+      - "docker"
+      - "mariadb"
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-patch"]
+
+  # Monitor WordPress PHP 8.3 Dockerfiles
+  - package-ecosystem: "docker"
+    directory: "/containers/wordpress/6.8.3-php8.3"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    open-pull-requests-limit: 5
+    labels:
+      - "dependencies"
+      - "docker"
+      - "wordpress"
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-patch"]
+
+  # Monitor WordPress PHP 8.4 Dockerfiles
+  - package-ecosystem: "docker"
+    directory: "/containers/wordpress/6.8.3-php8.4"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    open-pull-requests-limit: 5
+    labels:
+      - "dependencies"
+      - "docker"
+      - "wordpress"
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-patch"]
+
+  # Monitor GitHub Actions workflows
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    open-pull-requests-limit: 5
+    # reviewers:
+      # - "your-github-username"  # Add your GitHub username here
+    labels:
+      - "dependencies"
+      - "github-actions"
+    # Group all GitHub Actions updates together
+    groups:
+      github-actions:
+        patterns:
+          - "*"

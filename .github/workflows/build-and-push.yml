@@ -343,11 +343,11 @@ jobs:
             sleep 30
             
             # Check if WordPress can connect to database via WP-CLI
-            if docker compose -f wordpress-complete.yml exec -T wordpress wp --allow-root core is-installed; then
+            if docker compose -f wordpress-complete.yml exec -T -w /var/www/html wordpress wp --allow-root core is-installed; then
               echo "✅ WordPress is installed and database connection working"
             else
               echo "WordPress not yet installed, checking database connectivity directly..."
-              docker compose -f wordpress-complete.yml exec -T wordpress wp --allow-root db check
+              docker compose -f wordpress-complete.yml exec -T -w /var/www/html wordpress wp --allow-root db check
               echo "✅ Database connection working (WordPress not installed yet)"
             fi
             

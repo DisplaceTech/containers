@@ -39,16 +39,7 @@ COPY my.cnf /etc/my.cnf.d/custom.cnf
 COPY docker-entrypoint.sh /usr/local/bin/
 RUN chmod +x /usr/local/bin/docker-entrypoint.sh
 
-# Switch to mysql user for initialization
-USER mysql
-
-# Initialize MariaDB data directory
-RUN mariadb-install-db --user=mysql --datadir=/var/lib/mysql --skip-test-db
-
-# Back to root for final setup
-USER root
-
-# Set proper ownership one more time
+# Ensure mysql user owns the directories (database will be initialized at runtime)
 RUN chown -R mysql:mysql /var/lib/mysql /var/log/mysql /run/mysqld
 
 # Environment variables with defaults

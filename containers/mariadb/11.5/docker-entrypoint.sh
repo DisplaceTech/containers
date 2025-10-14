@@ -18,8 +18,8 @@ log_error() {
 }
 
 # Check if we're running as mysql user
-if [ "$(id -u)" != "1001" ]; then
-    log_error "Container must run as user mysql (UID 1001)"
+if [ "$(id -u)" != "100" ]; then
+    log_error "Container must run as user mysql (UID 100)"
     exit 1
 fi
 
@@ -30,7 +30,7 @@ generate_password() {
 
 # Function to execute SQL
 mysql_exec() {
-    mariadb --protocol=socket -uroot --socket=/run/mysqld/mysqld.sock --silent "$@"
+    mariadb --protocol=socket --socket=/run/mysqld/mysqld.sock --silent "$@"
 }
 
 # Function to check if MariaDB is ready
@@ -81,18 +81,18 @@ EOSQL
     if [ -n "$MYSQL_ROOT_PASSWORD" ]; then
         log "Setting root password..."
         mysql_exec <<-EOSQL
-            SET PASSWORD FOR 'root'@'localhost' = PASSWORD('$MYSQL_ROOT_PASSWORD');
-            SET PASSWORD FOR 'root'@'127.0.0.1' = PASSWORD('$MYSQL_ROOT_PASSWORD');
-            SET PASSWORD FOR 'root'@'::1' = PASSWORD('$MYSQL_ROOT_PASSWORD');
+            ALTER USER 'root'@'localhost' IDENTIFIED BY '$MYSQL_ROOT_PASSWORD';
+            CREATE USER IF NOT EXISTS 'root'@'%' IDENTIFIED BY '$MYSQL_ROOT_PASSWORD';
+            GRANT ALL PRIVILEGES ON *.* TO 'root'@'%' WITH GRANT OPTION;
             FLUSH PRIVILEGES;
 EOSQL
     elif [ "$MYSQL_ALLOW_EMPTY_PASSWORD" != "yes" ] && [ "$MYSQL_RANDOM_ROOT_PASSWORD" = "yes" ]; then
         log "Generating random root password..."
         MYSQL_ROOT_PASSWORD=$(generate_password)
         mysql_exec <<-EOSQL
-            SET PASSWORD FOR 'root'@'localhost' = PASSWORD('$MYSQL_ROOT_PASSWORD');
-            SET PASSWORD FOR 'root'@'127.0.0.1' = PASSWORD('$MYSQL_ROOT_PASSWORD');
-            SET PASSWORD FOR 'root'@'::1' = PASSWORD('$MYSQL_ROOT_PASSWORD');
+            ALTER USER 'root'@'localhost' IDENTIFIED BY '$MYSQL_ROOT_PASSWORD';
+            CREATE USER IF NOT EXISTS 'root'@'%' IDENTIFIED BY '$MYSQL_ROOT_PASSWORD';
+            GRANT ALL PRIVILEGES ON *.* TO 'root'@'%' WITH GRANT OPTION;
             FLUSH PRIVILEGES;
 EOSQL
         log "GENERATED ROOT PASSWORD: $MYSQL_ROOT_PASSWORD"
@@ -176,14 +176,17 @@ if [ "$1" = 'mariadbd' ] || [ "$1" = 'mysqld' ]; then
     # Ensure directories exist and have correct permissions
     mkdir -p /var/lib/mysql /var/log/mysql /run/mysqld
     
-    # Check if database needs initialization
+    # Initialize MariaDB data directory if it doesn't exist
     if [ ! -d "/var/lib/mysql/mysql" ]; then
-        log "Database not found, initializing..."
-        init_database
-        log "Database initialization completed"
-    else
-        log "Database found, skipping initialization"
+        log "Database not found, installing..."
+        mariadb-install-db --user=mysql --datadir=/var/lib/mysql --skip-test-db
+        log "Database installation completed"
     fi
+    
+    # Check if database needs configuration (always run for environment variables)
+    log "Database found, initializing..."
+    init_database
+    log "Database initialization completed"
     
     log "Starting MariaDB server..."
 fi

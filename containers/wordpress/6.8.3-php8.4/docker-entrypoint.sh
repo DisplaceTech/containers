@@ -45,7 +45,8 @@ setup_wordpress() {
     chown -R www-data:www-data /var/www/html
     find /var/www/html -type d -exec chmod 755 {} \;
     find /var/www/html -type f -exec chmod 644 {} \;
-    chmod 600 /var/www/html/wp-config.php
+    # wp-config.php needs to be readable by web server
+    chmod 644 /var/www/html/wp-config.php
 }
 
 # Wait for database
@@ -106,9 +107,9 @@ fix_permissions() {
     chmod -R 755 /var/www/html
     find /var/www/html -type f -exec chmod 644 {} \;
     
-    # Special permissions for wp-config.php
+    # Special permissions for wp-config.php (readable by web server)
     if [ -f /var/www/html/wp-config.php ]; then
-        chmod 600 /var/www/html/wp-config.php
+        chmod 644 /var/www/html/wp-config.php
     fi
     
     # Writable directories

@@ -1,8 +1,6 @@
 # Complete WordPress Stack - Displace Technologies Container Library
 # This example provides a full WordPress installation using our custom containers
 
-version: '3.8'
-
 services:
   # WordPress with PHP 8.4 and Apache
   wordpress:

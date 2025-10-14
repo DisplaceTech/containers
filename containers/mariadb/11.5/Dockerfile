@@ -34,7 +34,8 @@ RUN mkdir -p /var/lib/mysql \
                             /run/mysqld \
     && chmod 755 /docker-entrypoint-initdb.d
 
-# Copy configuration files
+# Remove problematic default Alpine MariaDB config and copy our config
+RUN rm -f /etc/my.cnf.d/mariadb-server.cnf
 COPY my.cnf /etc/my.cnf.d/custom.cnf
 COPY docker-entrypoint.sh /usr/local/bin/
 RUN chmod +x /usr/local/bin/docker-entrypoint.sh
@@ -65,4 +66,4 @@ USER mysql
 
 # Entry point
 ENTRYPOINT ["docker-entrypoint.sh"]
-CMD ["mariadbd", "--user=mysql"]
+CMD ["mariadbd"]

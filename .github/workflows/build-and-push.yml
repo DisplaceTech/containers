@@ -1,4 +1,4 @@
-name: Build and Push Container Images
+name: '[CI/CD] Container Image Build'
 
 on:
   push:

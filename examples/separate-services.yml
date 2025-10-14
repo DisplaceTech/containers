@@ -6,7 +6,7 @@ version: '3.8'
 services:
   # Apache Web Server
   web:
-    image: ghcr.io/displacetech/apache:latest
+    image: ghcr.io/DisplaceTech/apache:latest
     ports:
       - "8080:80"
     volumes:
@@ -22,7 +22,7 @@ services:
 
   # PHP-FPM 8.4
   php:
-    image: ghcr.io/displacetech/php-fpm:8.4
+    image: ghcr.io/DisplaceTech/php-fpm:8.4
     volumes:
       - ./html:/var/www/html
       - ./php-config:/etc/php84/conf.d:ro
@@ -35,7 +35,7 @@ services:
 
   # MariaDB Database
   database:
-    image: ghcr.io/displacetech/mariadb:latest
+    image: ghcr.io/DisplaceTech/mariadb:latest
     environment:
       MYSQL_ROOT_PASSWORD: secure_root_password
       MYSQL_DATABASE: appdb

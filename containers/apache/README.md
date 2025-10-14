@@ -6,16 +6,16 @@ Apache HTTP Server 2.4.65 running on Alpine Linux 3.22, optimized for containeri
 
 ```bash
 # Run Apache with default configuration
-docker run -d -p 8080:80 ghcr.io/displacetech/apache:latest
+docker run -d -p 8080:80 ghcr.io/DisplaceTech/apache:latest
 
 # Run with custom content
-docker run -d -p 8080:80 -v $(pwd)/html:/var/www/html ghcr.io/displacetech/apache:latest
+docker run -d -p 8080:80 -v $(pwd)/html:/var/www/html ghcr.io/DisplaceTech/apache:latest
 
 # Run with SSL support
 docker run -d -p 8080:80 -p 8443:443 \
   -v $(pwd)/certs:/etc/ssl/certs \
   -v $(pwd)/private:/etc/ssl/private \
-  ghcr.io/displacetech/apache:latest
+  ghcr.io/DisplaceTech/apache:latest
 ```
 
 ## Features
@@ -59,7 +59,7 @@ docker run -d -p 8080:80 -p 8443:443 \
 version: '3.8'
 services:
   web:
-    image: ghcr.io/displacetech/apache:latest
+    image: ghcr.io/DisplaceTech/apache:latest
     ports:
       - "8080:80"
       - "8443:443"
@@ -139,7 +139,7 @@ Mount custom configuration files:
 ```bash
 docker run -d -p 8080:80 \
   -v $(pwd)/custom.conf:/etc/apache2/conf.d/custom.conf \
-  ghcr.io/displacetech/apache:latest
+  ghcr.io/DisplaceTech/apache:latest
 ```
 
 ### Performance Tuning
@@ -202,14 +202,14 @@ Run in debug mode for troubleshooting:
 ```bash
 docker run -it --rm -p 8080:80 \
   -e APACHE_LOG_LEVEL=debug \
-  ghcr.io/displacetech/apache:latest
+  ghcr.io/DisplaceTech/apache:latest
 ```
 
 ## Tags and Versioning
 
-- `ghcr.io/displacetech/apache:latest` - Latest stable version
-- `ghcr.io/displacetech/apache:2.4.65` - Specific Apache version
-- `ghcr.io/displacetech/apache:2.4` - Apache 2.4 series
+- `ghcr.io/DisplaceTech/apache:latest` - Latest stable version
+- `ghcr.io/DisplaceTech/apache:2.4.65` - Specific Apache version
+- `ghcr.io/DisplaceTech/apache:2.4` - Apache 2.4 series
 
 ## License
 

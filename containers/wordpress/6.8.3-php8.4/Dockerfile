@@ -49,6 +49,7 @@ RUN apk add --no-cache \
     php84-tokenizer=8.4.13-r0 \
     php84-opcache=8.4.13-r0 \
     php84-exif=8.4.13-r0 \
+    php84-phar=8.4.13-r0 \
     php84-pecl-imagick=3.8.0-r1 \
     wget \
     unzip \

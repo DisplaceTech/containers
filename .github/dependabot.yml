@@ -1,38 +1,91 @@
 version: 2
 updates:
-  # Monitor all container Dockerfiles in one configuration
-  # Dependabot will automatically discover all Dockerfiles recursively
+  # Monitor Apache Dockerfiles
   - package-ecosystem: "docker"
-    directory: "/containers"
+    directory: "/containers/apache/2.4"
     schedule:
       interval: "weekly"
       day: "monday"
-    open-pull-requests-limit: 10
-    # reviewers:
-      # - "your-github-username"  # Add your GitHub username here
+    open-pull-requests-limit: 5
     labels:
       - "dependencies"
       - "docker"
-      - "security"
-    # Group updates by base image to reduce PR noise
-    groups:
-      alpine-updates:
-        patterns:
-          - "alpine"
-          - "alpine:*"
-      php-updates:
-        patterns:
-          - "php*"
-      apache-updates:
-        patterns:
-          - "apache*"
-          - "httpd*"
-      mariadb-updates:
-        patterns:
-          - "mariadb*"
-          - "mysql*"
-    # Only create PRs for security updates and major/minor versions
-    # Ignore patch-level updates to reduce noise
+      - "apache"
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-patch"]
+
+  # Monitor PHP-FPM 8.3 Dockerfiles
+  - package-ecosystem: "docker"
+    directory: "/containers/php-fpm/8.3"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    open-pull-requests-limit: 5
+    labels:
+      - "dependencies"
+      - "docker"
+      - "php-fpm"
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-patch"]
+
+  # Monitor PHP-FPM 8.4 Dockerfiles
+  - package-ecosystem: "docker"
+    directory: "/containers/php-fpm/8.4"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    open-pull-requests-limit: 5
+    labels:
+      - "dependencies"
+      - "docker"
+      - "php-fpm"
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-patch"]
+
+  # Monitor MariaDB Dockerfiles
+  - package-ecosystem: "docker"
+    directory: "/containers/mariadb/11.5"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    open-pull-requests-limit: 5
+    labels:
+      - "dependencies"
+      - "docker"
+      - "mariadb"
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-patch"]
+
+  # Monitor WordPress PHP 8.3 Dockerfiles
+  - package-ecosystem: "docker"
+    directory: "/containers/wordpress/6.8.3-php8.3"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    open-pull-requests-limit: 5
+    labels:
+      - "dependencies"
+      - "docker"
+      - "wordpress"
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-patch"]
+
+  # Monitor WordPress PHP 8.4 Dockerfiles
+  - package-ecosystem: "docker"
+    directory: "/containers/wordpress/6.8.3-php8.4"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    open-pull-requests-limit: 5
+    labels:
+      - "dependencies"
+      - "docker"
+      - "wordpress"
     ignore:
       - dependency-name: "*"
         update-types: ["version-update:semver-patch"]

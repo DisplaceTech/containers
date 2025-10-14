@@ -8,24 +8,20 @@ Our Dependabot configuration is designed to scale efficiently as we add more con
 
 ### Key Design Principles
 
-1. **Single Directory Monitoring**: Instead of listing each container individually, we monitor the entire `/containers` directory. Dependabot automatically discovers all Dockerfiles recursively.
+1. **Specific Directory Monitoring**: Each container directory with a Dockerfile is monitored individually to ensure Dependabot can find the Dockerfiles properly.
 
-2. **Intelligent Grouping**: Updates are grouped by technology stack to reduce PR noise:
-   - `alpine-updates`: All Alpine Linux base image updates
-   - `php-updates`: PHP-related package updates
-   - `apache-updates`: Apache/httpd package updates  
-   - `mariadb-updates`: MariaDB/MySQL package updates
+2. **Noise Reduction**: We ignore patch-level updates (`semver-patch`) to focus on security and feature updates that matter more.
 
-3. **Noise Reduction**: We ignore patch-level updates (`semver-patch`) to focus on security and feature updates that matter more.
+3. **Reasonable Limits**: Maximum 5 open PRs per container to prevent overwhelming the team.
 
-4. **Reasonable Limits**: Maximum 10 open PRs to prevent overwhelming the team.
+4. **Component-Specific Labels**: Each container gets specific labels (apache, php-fpm, mariadb, wordpress) for easier tracking.
 
 ### Benefits of This Approach
 
-- **Automatic Discovery**: New containers are automatically monitored without config changes
-- **Reduced Noise**: Grouping and filtering prevents dozens of minor update PRs
+- **Reliable Detection**: Dependabot can always find Dockerfiles in the specified directories
+- **Focused Updates**: Each container type gets its own PR with relevant context
 - **Security Focus**: Prioritizes security updates over minor patches
-- **Scalable**: Works whether you have 5 containers or 50
+- **Clear Attribution**: Easy to see which container component needs updates
 
 ## Container Versioning Strategy
 
@@ -71,6 +67,11 @@ containers/
 - Use build args for configurable versions
 - Document version update process in container README
 - Test version compatibility before updates
+
+### 4. Dependabot Configuration
+- Add a new entry in `.github/dependabot.yml` for the new container directory
+- Use the specific path to the Dockerfile location
+- Include appropriate labels for the container type
 
 ## Monitoring and Alerts
 

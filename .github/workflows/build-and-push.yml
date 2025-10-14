@@ -358,21 +358,30 @@ jobs:
   # Test individual containers (basic health checks)
   test-containers:
     runs-on: ubuntu-latest
-    needs: [detect-changes, build-apache, build-php-fpm, build-mariadb]
+    needs: [detect-changes, build-apache, build-php-fpm, build-mariadb, build-wordpress]
     if: |
       always() && !cancelled() && (
         needs.detect-changes.outputs.apache == 'true' ||
         needs.detect-changes.outputs.php-fpm == 'true' ||
         needs.detect-changes.outputs.mariadb == 'true' ||
+        needs.detect-changes.outputs.wordpress == 'true' ||
         github.event.inputs.container == 'all' ||
         github.event.inputs.container == 'apache' ||
         github.event.inputs.container == 'php-fpm' ||
-        github.event.inputs.container == 'mariadb'
+        github.event.inputs.container == 'mariadb' ||
+        github.event.inputs.container == 'wordpress'
       )
     permissions:
       contents: read
       packages: read
     steps:
+      - name: Log in to Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Test Apache container
         if: |
           needs.detect-changes.outputs.apache == 'true' ||
@@ -380,6 +389,7 @@ jobs:
           github.event.inputs.container == 'apache'
         run: |
           echo "Testing Apache container basic functionality..."
+          docker pull ghcr.io/displacetech/apache:latest
           docker run --rm -d --name test-apache -p 8081:80 ghcr.io/displacetech/apache:latest
           sleep 10
           curl -f http://localhost:8081 && echo "✅ Apache responding"
@@ -392,6 +402,7 @@ jobs:
           github.event.inputs.container == 'php-fpm'
         run: |
           echo "Testing PHP-FPM container basic functionality..."
+          docker pull ghcr.io/displacetech/php-fpm:latest
           docker run --rm -d --name test-php-fpm ghcr.io/displacetech/php-fpm:latest
           sleep 5
           docker exec test-php-fpm php --version && echo "✅ PHP-FPM responding"
@@ -404,6 +415,7 @@ jobs:
           github.event.inputs.container == 'mariadb'
         run: |
           echo "Testing MariaDB container basic functionality..."
+          docker pull ghcr.io/displacetech/mariadb:latest
           docker run --rm -d --name test-mariadb \
             -e MYSQL_ROOT_PASSWORD=test123 \
             -e MYSQL_DATABASE=testdb \
@@ -411,6 +423,48 @@ jobs:
           sleep 15
           docker exec test-mariadb mariadb-admin ping -h localhost && echo "✅ MariaDB responding"
           docker stop test-mariadb
+          
+      - name: Test WordPress containers
+        if: |
+          needs.detect-changes.outputs.wordpress == 'true' ||
+          github.event.inputs.container == 'all' ||
+          github.event.inputs.container == 'wordpress'
+        run: |
+          echo "Testing WordPress containers basic functionality..."
+          
+          # Test PHP 8.4 version
+          echo "Testing WordPress 6.8.3-php8.4..."
+          docker pull ghcr.io/displacetech/wordpress:6.8.3-php8.4
+          docker run --rm -d --name test-wordpress-84 -p 8082:8080 \
+            -e WORDPRESS_DB_HOST=fake-host \
+            -e WORDPRESS_DB_NAME=wordpress \
+            -e WORDPRESS_DB_USER=wordpress \
+            -e WORDPRESS_DB_PASSWORD=password \
+            ghcr.io/displacetech/wordpress:6.8.3-php8.4
+          sleep 15
+          
+          # Test that Apache is running and WordPress files are present
+          docker exec test-wordpress-84 ls -la /var/www/html/wp-config.php
+          docker exec test-wordpress-84 php --version | grep "PHP 8.4"
+          echo "✅ WordPress 6.8.3-php8.4 responding"
+          docker stop test-wordpress-84
+          
+          # Test PHP 8.3 version  
+          echo "Testing WordPress 6.8.3-php8.3..."
+          docker pull ghcr.io/displacetech/wordpress:6.8.3-php8.3
+          docker run --rm -d --name test-wordpress-83 -p 8083:8080 \
+            -e WORDPRESS_DB_HOST=fake-host \
+            -e WORDPRESS_DB_NAME=wordpress \
+            -e WORDPRESS_DB_USER=wordpress \
+            -e WORDPRESS_DB_PASSWORD=password \
+            ghcr.io/displacetech/wordpress:6.8.3-php8.3
+          sleep 15
+          
+          # Test that Apache is running and WordPress files are present
+          docker exec test-wordpress-83 ls -la /var/www/html/wp-config.php
+          docker exec test-wordpress-83 php --version | grep "PHP 8.3"
+          echo "✅ WordPress 6.8.3-php8.3 responding"
+          docker stop test-wordpress-83
 
   # Summary job
   build-summary:

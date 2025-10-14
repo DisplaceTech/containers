@@ -1,9 +1,15 @@
+# Build arguments
 ARG ALPINE_VERSION=3.22
 ARG PHP_VERSION=8.3
 ARG PHP_FULL_VERSION=8.3.26
 ARG PHP_RELEASE=r0
 
 FROM alpine:${ALPINE_VERSION}
+
+# Re-declare args after FROM for use in LABELs
+ARG ALPINE_VERSION=3.22
+ARG PHP_VERSION=8.3
+ARG PHP_FULL_VERSION=8.3.26
 
 # Metadata labels
 LABEL org.opencontainers.image.title="WordPress"
@@ -101,20 +107,16 @@ RUN mkdir -p /var/www/html/wp-content/uploads \
     && chown -R www-data:www-data /var/www/html/wp-content \
     && chmod 755 /var/www/html/wp-content/uploads
 
-# Environment variables for WordPress configuration
+# Environment variables for WordPress configuration (non-sensitive defaults)
 ENV WORDPRESS_DB_HOST=""
 ENV WORDPRESS_DB_NAME=""
 ENV WORDPRESS_DB_USER=""
-ENV WORDPRESS_DB_PASSWORD=""
+# Note: Set WORDPRESS_DB_PASSWORD at container startup for security
 ENV WORDPRESS_TABLE_PREFIX="wp_"
-ENV WORDPRESS_AUTH_KEY=""
-ENV WORDPRESS_SECURE_AUTH_KEY=""
-ENV WORDPRESS_LOGGED_IN_KEY=""
-ENV WORDPRESS_NONCE_KEY=""
-ENV WORDPRESS_AUTH_SALT=""
-ENV WORDPRESS_SECURE_AUTH_SALT=""
-ENV WORDPRESS_LOGGED_IN_SALT=""
-ENV WORDPRESS_NONCE_SALT=""
+# Note: WordPress security keys should be set at container startup
+# Sensitive variables: WORDPRESS_AUTH_KEY, WORDPRESS_SECURE_AUTH_KEY,
+# WORDPRESS_LOGGED_IN_KEY, WORDPRESS_NONCE_KEY, WORDPRESS_AUTH_SALT,
+# WORDPRESS_SECURE_AUTH_SALT, WORDPRESS_LOGGED_IN_SALT, WORDPRESS_NONCE_SALT
 ENV WORDPRESS_DEBUG="false"
 ENV WORDPRESS_DEBUG_LOG="false"
 

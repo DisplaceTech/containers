@@ -43,11 +43,12 @@ RUN chmod +x /usr/local/bin/docker-entrypoint.sh
 # Ensure mysql user owns the directories (database will be initialized at runtime)
 RUN chown -R mysql:mysql /var/lib/mysql /var/log/mysql /run/mysqld
 
-# Environment variables with defaults
-ENV MYSQL_ROOT_PASSWORD=""
+# Environment variables (no sensitive defaults - set at runtime)
 ENV MYSQL_DATABASE=""
 ENV MYSQL_USER=""
-ENV MYSQL_PASSWORD=""
+# Note: Sensitive variables MYSQL_ROOT_PASSWORD, MYSQL_PASSWORD should be set at runtime
+# ENV MYSQL_ROOT_PASSWORD - Set this at container startup for security
+# ENV MYSQL_PASSWORD - Set this at container startup for security
 ENV MYSQL_ALLOW_EMPTY_PASSWORD="no"
 ENV MYSQL_RANDOM_ROOT_PASSWORD="no"
 

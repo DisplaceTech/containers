@@ -1,10 +1,12 @@
-ARG PHP_VERSION=8.4.13
 FROM alpine:3.22
+
+# Build arguments
+ARG PHP_VERSION=8.4.13
 
 # Metadata labels
 LABEL org.opencontainers.image.title="PHP-FPM"
-LABEL org.opencontainers.image.description="PHP-FPM ${PHP_VERSION:-8.4.13} on Alpine Linux with extensions for WordPress"
-LABEL org.opencontainers.image.version="${PHP_VERSION:-8.4.13}"
+LABEL org.opencontainers.image.description="PHP-FPM ${PHP_VERSION} on Alpine Linux with extensions for WordPress"
+LABEL org.opencontainers.image.version="${PHP_VERSION}"
 LABEL org.opencontainers.image.authors="Displace Technologies <hello@displace.tech>"
 LABEL org.opencontainers.image.url="https://github.com/displacetech/containers"
 LABEL org.opencontainers.image.documentation="https://github.com/displacetech/containers/tree/main/containers/php-fpm"
@@ -12,8 +14,6 @@ LABEL org.opencontainers.image.source="https://github.com/displacetech/container
 LABEL org.opencontainers.image.vendor="Displace Technologies"
 LABEL org.opencontainers.image.licenses="MIT"
 LABEL org.opencontainers.image.base.name="alpine:3.22"
-
-ARG PHP_VERSION=8.4.13
 
 # Install PHP and essential extensions for WordPress
 RUN apk add --no-cache \

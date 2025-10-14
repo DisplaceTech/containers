@@ -272,7 +272,6 @@ jobs:
         with:
           images: ${{ env.REGISTRY }}/${{ env.REGISTRY_NAMESPACE }}/wordpress
           tags: |
-            type=ref,event=branch
             type=ref,event=pr
             type=raw,value=${{ matrix.wordpress_version }}-php${{ matrix.php_version }},enable={{is_default_branch}}
 

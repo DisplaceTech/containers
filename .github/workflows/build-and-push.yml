@@ -87,7 +87,7 @@ jobs:
         uses: actions/checkout@v5
 
       - name: Log in to Container Registry
-        if: github.event_name != 'pull_request'
+        if: github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch'
         uses: docker/login-action@v3
         with:
           registry: ${{ env.REGISTRY }}
@@ -113,7 +113,7 @@ jobs:
         with:
           context: ./containers/apache/2.4
           platforms: linux/amd64,linux/arm64
-          push: ${{ github.event_name != 'pull_request' && (github.event.inputs.push_images != 'false') }}
+          push: ${{ (github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch') && (github.event.inputs.push_images != 'false') }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
@@ -147,7 +147,7 @@ jobs:
         uses: actions/checkout@v5
 
       - name: Log in to Container Registry
-        if: github.event_name != 'pull_request'
+        if: github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch'
         uses: docker/login-action@v3
         with:
           registry: ${{ env.REGISTRY }}
@@ -174,7 +174,7 @@ jobs:
         with:
           context: ./containers/php-fpm/${{ matrix.php_version }}
           platforms: linux/amd64,linux/arm64
-          push: ${{ github.event_name != 'pull_request' && (github.event.inputs.push_images != 'false') }}
+          push: ${{ (github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch') && (github.event.inputs.push_images != 'false') }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha,scope=php-fpm-${{ matrix.php_version }}
@@ -198,7 +198,7 @@ jobs:
         uses: actions/checkout@v5
 
       - name: Log in to Container Registry
-        if: github.event_name != 'pull_request'
+        if: github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch'
         uses: docker/login-action@v3
         with:
           registry: ${{ env.REGISTRY }}
@@ -224,7 +224,7 @@ jobs:
         with:
           context: ./containers/mariadb/11.5
           platforms: linux/amd64,linux/arm64
-          push: ${{ github.event_name != 'pull_request' && (github.event.inputs.push_images != 'false') }}
+          push: ${{ (github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch') && (github.event.inputs.push_images != 'false') }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
@@ -256,7 +256,7 @@ jobs:
         uses: actions/checkout@v5
 
       - name: Log in to Container Registry
-        if: github.event_name != 'pull_request'
+        if: github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch'
         uses: docker/login-action@v3
         with:
           registry: ${{ env.REGISTRY }}
@@ -280,7 +280,7 @@ jobs:
         with:
           context: ./containers/wordpress/${{ matrix.wordpress_version }}-php${{ matrix.php_version }}
           platforms: linux/amd64,linux/arm64
-          push: ${{ github.event_name != 'pull_request' && (github.event.inputs.push_images != 'false') }}
+          push: ${{ (github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch') && (github.event.inputs.push_images != 'false') }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha,scope=wordpress-${{ matrix.php_version }}
@@ -306,6 +306,8 @@ jobs:
         uses: actions/checkout@v5
 
       - name: Log in to Container Registry
+        # Only login if we need to pull from registry (non-PR events)
+        if: github.event_name != 'pull_request'
         uses: docker/login-action@v3
         with:
           registry: ${{ env.REGISTRY }}
@@ -375,7 +377,15 @@ jobs:
       contents: read
       packages: read
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
       - name: Log in to Container Registry
+        # Only login if we need to pull from registry (non-PR events)
+        if: github.event_name != 'pull_request'
         uses: docker/login-action@v3
         with:
           registry: ${{ env.REGISTRY }}
@@ -389,11 +399,18 @@ jobs:
           github.event.inputs.container == 'apache'
         run: |
           echo "Testing Apache container basic functionality..."
-          docker pull ghcr.io/displacetech/apache:latest
-          docker run --rm -d --name test-apache -p 8081:80 ghcr.io/displacetech/apache:latest
+          
+          # Build image locally for testing
+          docker build -t test-apache-local ./containers/apache/2.4
+          
+          # Test locally built image
+          docker run --rm -d --name test-apache -p 8081:80 test-apache-local
           sleep 10
           curl -f http://localhost:8081 && echo "✅ Apache responding"
           docker stop test-apache
+          
+          # Clean up local test image
+          docker rmi test-apache-local
           
       - name: Test PHP-FPM container
         if: |
@@ -402,11 +419,18 @@ jobs:
           github.event.inputs.container == 'php-fpm'
         run: |
           echo "Testing PHP-FPM container basic functionality..."
-          docker pull ghcr.io/displacetech/php-fpm:latest
-          docker run --rm -d --name test-php-fpm ghcr.io/displacetech/php-fpm:latest
+          
+          # Build latest PHP-FPM image locally for testing (PHP 8.4)
+          docker build -t test-php-fpm-local ./containers/php-fpm/8.4
+          
+          # Test locally built image
+          docker run --rm -d --name test-php-fpm test-php-fpm-local
           sleep 5
           docker exec test-php-fpm php --version && echo "✅ PHP-FPM responding"
           docker stop test-php-fpm
+          
+          # Clean up local test image
+          docker rmi test-php-fpm-local
           
       - name: Test MariaDB container
         if: |
@@ -415,14 +439,21 @@ jobs:
           github.event.inputs.container == 'mariadb'
         run: |
           echo "Testing MariaDB container basic functionality..."
-          docker pull ghcr.io/displacetech/mariadb:latest
+          
+          # Build MariaDB image locally for testing
+          docker build -t test-mariadb-local ./containers/mariadb/11.5
+          
+          # Test locally built image
           docker run --rm -d --name test-mariadb \
             -e MYSQL_ROOT_PASSWORD=test123 \
             -e MYSQL_DATABASE=testdb \
-            ghcr.io/displacetech/mariadb:latest
+            test-mariadb-local
           sleep 15
           docker exec test-mariadb mariadb-admin ping -h localhost && echo "✅ MariaDB responding"
           docker stop test-mariadb
+          
+          # Clean up local test image
+          docker rmi test-mariadb-local
           
       - name: Test WordPress containers
         if: |
@@ -434,13 +465,17 @@ jobs:
           
           # Test PHP 8.4 version
           echo "Testing WordPress 6.8.3-php8.4..."
-          docker pull ghcr.io/displacetech/wordpress:6.8.3-php8.4
+          
+          # Build WordPress PHP 8.4 image locally for testing
+          docker build -t test-wordpress-84-local ./containers/wordpress/6.8.3-php8.4
+          
+          # Test locally built image
           docker run --rm -d --name test-wordpress-84 -p 8082:8080 \
             -e WORDPRESS_DB_HOST=fake-host \
             -e WORDPRESS_DB_NAME=wordpress \
             -e WORDPRESS_DB_USER=wordpress \
             -e WORDPRESS_DB_PASSWORD=password \
-            ghcr.io/displacetech/wordpress:6.8.3-php8.4
+            test-wordpress-84-local
           sleep 15
           
           # Test that Apache is running and WordPress files are present
@@ -449,15 +484,22 @@ jobs:
           echo "✅ WordPress 6.8.3-php8.4 responding"
           docker stop test-wordpress-84
           
+          # Clean up PHP 8.4 test image
+          docker rmi test-wordpress-84-local
+          
           # Test PHP 8.3 version  
           echo "Testing WordPress 6.8.3-php8.3..."
-          docker pull ghcr.io/displacetech/wordpress:6.8.3-php8.3
+          
+          # Build WordPress PHP 8.3 image locally for testing
+          docker build -t test-wordpress-83-local ./containers/wordpress/6.8.3-php8.3
+          
+          # Test locally built image
           docker run --rm -d --name test-wordpress-83 -p 8083:8080 \
             -e WORDPRESS_DB_HOST=fake-host \
             -e WORDPRESS_DB_NAME=wordpress \
             -e WORDPRESS_DB_USER=wordpress \
             -e WORDPRESS_DB_PASSWORD=password \
-            ghcr.io/displacetech/wordpress:6.8.3-php8.3
+            test-wordpress-83-local
           sleep 15
           
           # Test that Apache is running and WordPress files are present
@@ -465,6 +507,9 @@ jobs:
           docker exec test-wordpress-83 php --version | grep "PHP 8.3"
           echo "✅ WordPress 6.8.3-php8.3 responding"
           docker stop test-wordpress-83
+          
+          # Clean up PHP 8.3 test image
+          docker rmi test-wordpress-83-local
 
   # Summary job
   build-summary:

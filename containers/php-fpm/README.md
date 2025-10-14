@@ -4,8 +4,8 @@ High-performance PHP-FPM containers optimized for WordPress development, availab
 
 ## Available Versions
 
-- **PHP 8.4.13** (latest) - `ghcr.io/DisplaceTech/php-fpm:latest`
-- **PHP 8.3.26** - `ghcr.io/DisplaceTech/php-fpm:8.3`
+- **PHP 8.4.13** (latest) - `ghcr.io/displacetech/php-fpm:latest`
+- **PHP 8.3.26** - `ghcr.io/displacetech/php-fpm:8.3`
 
 Both versions include all essential extensions for WordPress development.
 
@@ -13,13 +13,13 @@ Both versions include all essential extensions for WordPress development.
 
 ```bash
 # Run PHP-FPM 8.4 (latest)
-docker run -d -p 9000:9000 ghcr.io/DisplaceTech/php-fpm:latest
+docker run -d -p 9000:9000 ghcr.io/displacetech/php-fpm:latest
 
 # Run PHP-FPM 8.3
-docker run -d -p 9000:9000 ghcr.io/DisplaceTech/php-fpm:8.3
+docker run -d -p 9000:9000 ghcr.io/displacetech/php-fpm:8.3
 
 # Run with custom code
-docker run -d -p 9000:9000 -v $(pwd):/var/www/html ghcr.io/DisplaceTech/php-fpm:8.4
+docker run -d -p 9000:9000 -v $(pwd):/var/www/html ghcr.io/displacetech/php-fpm:8.4
 ```
 
 ## Features
@@ -80,7 +80,7 @@ All containers include these WordPress-essential extensions:
 version: '3.8'
 services:
   web:
-    image: ghcr.io/DisplaceTech/apache:latest
+    image: ghcr.io/displacetech/apache:latest
     ports:
       - "8080:80"
     volumes:
@@ -89,7 +89,7 @@ services:
       - php
 
   php:
-    image: ghcr.io/DisplaceTech/php-fpm:8.4
+    image: ghcr.io/displacetech/php-fpm:8.4
     volumes:
       - ./html:/var/www/html
 ```
@@ -110,7 +110,7 @@ services:
       - php
 
   php:
-    image: ghcr.io/DisplaceTech/php-fpm:8.4
+    image: ghcr.io/displacetech/php-fpm:8.4
     volumes:
       - ./html:/var/www/html
 ```
@@ -139,7 +139,7 @@ Complete WordPress setup with MariaDB:
 version: '3.8'
 services:
   wordpress:
-    image: ghcr.io/DisplaceTech/apache:latest
+    image: ghcr.io/displacetech/apache:latest
     ports:
       - "8080:80"
     volumes:
@@ -149,7 +149,7 @@ services:
       - mariadb
 
   php:
-    image: ghcr.io/DisplaceTech/php-fpm:8.4
+    image: ghcr.io/displacetech/php-fpm:8.4
     volumes:
       - ./wordpress:/var/www/html
     environment:
@@ -158,7 +158,7 @@ services:
       - mariadb
 
   mariadb:
-    image: ghcr.io/DisplaceTech/mariadb:latest
+    image: ghcr.io/displacetech/mariadb:latest
     environment:
       MYSQL_ROOT_PASSWORD: rootpass
       MYSQL_DATABASE: wordpress
@@ -202,7 +202,7 @@ Override PHP settings by mounting custom configuration:
 docker run -d -p 9000:9000 \
   -v $(pwd)/custom.ini:/etc/php84/conf.d/custom.ini \
   -v $(pwd):/var/www/html \
-  ghcr.io/DisplaceTech/php-fpm:8.4
+  ghcr.io/displacetech/php-fpm:8.4
 ```
 
 Example custom.ini:
@@ -263,7 +263,7 @@ Enable debug logging:
 ```bash
 docker run -d -p 9000:9000 \
   -v $(pwd)/debug.ini:/etc/php84/conf.d/debug.ini \
-  ghcr.io/DisplaceTech/php-fpm:8.4
+  ghcr.io/displacetech/php-fpm:8.4
 ```
 
 debug.ini:
@@ -275,11 +275,11 @@ log_errors = On
 
 ## Version-Specific Tags
 
-- `ghcr.io/DisplaceTech/php-fpm:latest` → PHP 8.4.13
-- `ghcr.io/DisplaceTech/php-fpm:8.4` → PHP 8.4.13
-- `ghcr.io/DisplaceTech/php-fpm:8.4.13` → PHP 8.4.13
-- `ghcr.io/DisplaceTech/php-fpm:8.3` → PHP 8.3.26
-- `ghcr.io/DisplaceTech/php-fpm:8.3.26` → PHP 8.3.26
+- `ghcr.io/displacetech/php-fpm:latest` → PHP 8.4.13
+- `ghcr.io/displacetech/php-fpm:8.4` → PHP 8.4.13
+- `ghcr.io/displacetech/php-fpm:8.4.13` → PHP 8.4.13
+- `ghcr.io/displacetech/php-fpm:8.3` → PHP 8.3.26
+- `ghcr.io/displacetech/php-fpm:8.3.26` → PHP 8.3.26
 
 ## Migration Guide
 
@@ -288,7 +288,7 @@ log_errors = On
 1. Update your Docker Compose file:
    ```yaml
    php:
-     image: ghcr.io/DisplaceTech/php-fpm:8.4
+     image: ghcr.io/displacetech/php-fpm:8.4
    ```
 
 2. Test your application thoroughly
@@ -327,7 +327,7 @@ Run in interactive mode for debugging:
 ```bash
 docker run -it --rm \
   -v $(pwd):/var/www/html \
-  ghcr.io/DisplaceTech/php-fpm:8.4 \
+  ghcr.io/displacetech/php-fpm:8.4 \
   /bin/sh
 ```
 

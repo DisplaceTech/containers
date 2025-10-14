@@ -3,7 +3,7 @@
 
 # Configuration
 REGISTRY ?= ghcr.io
-REGISTRY_NAMESPACE ?= DisplaceTech
+REGISTRY_NAMESPACE ?= displacetech
 PLATFORM ?= linux/amd64
 BUILD_ARGS ?=
 

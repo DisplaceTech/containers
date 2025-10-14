@@ -35,7 +35,7 @@ on:
 
 env:
   REGISTRY: ghcr.io
-  REGISTRY_NAMESPACE: DisplaceTech
+  REGISTRY_NAMESPACE: displacetech
 
 jobs:
   # Detect which containers have changed

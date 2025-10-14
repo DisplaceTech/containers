@@ -78,16 +78,16 @@ Each versioned directory contains everything needed to build that specific image
 
 ```bash
 # Build Apache 2.4
-docker build -t ghcr.io/DisplaceTech/apache:2.4.65 containers/apache/2.4/
+docker build -t ghcr.io/displacetech/apache:2.4.65 containers/apache/2.4/
 
 # Build PHP-FPM 8.4
-docker build -t ghcr.io/DisplaceTech/php-fpm:8.4.13 containers/php-fpm/8.4/
+docker build -t ghcr.io/displacetech/php-fpm:8.4.13 containers/php-fpm/8.4/
 
 # Build MariaDB 11.5
-docker build -t ghcr.io/DisplaceTech/mariadb:11.5 containers/mariadb/11.5/
+docker build -t ghcr.io/displacetech/mariadb:11.5 containers/mariadb/11.5/
 
 # Build WordPress with PHP 8.4
-docker build -t ghcr.io/DisplaceTech/wordpress:6.8.3-php8.4 containers/wordpress/6.8.3-php8.4/
+docker build -t ghcr.io/displacetech/wordpress:6.8.3-php8.4 containers/wordpress/6.8.3-php8.4/
 ```
 
 ## Container Features

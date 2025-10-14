@@ -6,7 +6,7 @@ High-performance MariaDB Server optimized for WordPress development and producti
 
 ```bash
 # Run MariaDB with root password
-docker run -d -p 3306:3306 -e MYSQL_ROOT_PASSWORD=rootpass ghcr.io/DisplaceTech/mariadb:latest
+docker run -d -p 3306:3306 -e MYSQL_ROOT_PASSWORD=rootpass ghcr.io/displacetech/mariadb:latest
 
 # Run with database and user creation
 docker run -d -p 3306:3306 \
@@ -14,13 +14,13 @@ docker run -d -p 3306:3306 \
   -e MYSQL_DATABASE=wordpress \
   -e MYSQL_USER=wpuser \
   -e MYSQL_PASSWORD=wppass \
-  ghcr.io/DisplaceTech/mariadb:latest
+  ghcr.io/displacetech/mariadb:latest
 
 # Run with persistent storage
 docker run -d -p 3306:3306 \
   -e MYSQL_ROOT_PASSWORD=rootpass \
   -v mariadb_data:/var/lib/mysql \
-  ghcr.io/DisplaceTech/mariadb:latest
+  ghcr.io/displacetech/mariadb:latest
 ```
 
 ## Features
@@ -91,7 +91,7 @@ MYSQL_PASSWORD=devpass
 version: '3.8'
 services:
   wordpress:
-    image: ghcr.io/DisplaceTech/wordpress:6.8.3-php8.4
+    image: ghcr.io/displacetech/wordpress:6.8.3-php8.4
     ports:
       - "8080:8080"
     environment:
@@ -105,7 +105,7 @@ services:
       - mariadb
 
   mariadb:
-    image: ghcr.io/DisplaceTech/mariadb:latest
+    image: ghcr.io/displacetech/mariadb:latest
     environment:
       MYSQL_ROOT_PASSWORD: rootpassword
       MYSQL_DATABASE: wordpress
@@ -128,14 +128,14 @@ volumes:
 version: '3.8'
 services:
   app:
-    image: ghcr.io/DisplaceTech/php-fpm:8.4
+    image: ghcr.io/displacetech/php-fpm:8.4
     volumes:
       - ./app:/var/www/html
     depends_on:
       - database
 
   database:
-    image: ghcr.io/DisplaceTech/mariadb:latest
+    image: ghcr.io/displacetech/mariadb:latest
     ports:
       - "3306:3306"  # Expose for external tools
     environment:
@@ -170,7 +170,7 @@ docker run -d -p 3306:3306 \
   -e MYSQL_DATABASE=myapp \
   -v $(pwd)/initdb:/docker-entrypoint-initdb.d:ro \
   -v mariadb_data:/var/lib/mysql \
-  ghcr.io/DisplaceTech/mariadb:latest
+  ghcr.io/displacetech/mariadb:latest
 ```
 
 **Example initialization script (`initdb/01-schema.sql`):**
@@ -207,7 +207,7 @@ Override settings by mounting a custom configuration file:
 docker run -d -p 3306:3306 \
   -e MYSQL_ROOT_PASSWORD=rootpass \
   -v $(pwd)/custom.cnf:/etc/my.cnf.d/custom.cnf:ro \
-  ghcr.io/DisplaceTech/mariadb:latest
+  ghcr.io/displacetech/mariadb:latest
 ```
 
 **Example custom.cnf:**
@@ -310,7 +310,7 @@ The container includes basic replication configuration. For master-slave setup:
 ```yaml
 services:
   mariadb-master:
-    image: ghcr.io/DisplaceTech/mariadb:latest
+    image: ghcr.io/displacetech/mariadb:latest
     environment:
       MYSQL_ROOT_PASSWORD: masterpass
     volumes:
@@ -364,7 +364,7 @@ Run with additional logging:
 docker run -d -p 3306:3306 \
   -e MYSQL_ROOT_PASSWORD=rootpass \
   -v $(pwd)/debug.cnf:/etc/my.cnf.d/debug.cnf:ro \
-  ghcr.io/DisplaceTech/mariadb:latest
+  ghcr.io/displacetech/mariadb:latest
 ```
 
 **debug.cnf:**
@@ -378,9 +378,9 @@ log_queries_not_using_indexes = 1
 
 ## Tags and Versioning
 
-- `ghcr.io/DisplaceTech/mariadb:latest` - Latest stable MariaDB
-- `ghcr.io/DisplaceTech/mariadb:11.5` - Specific version
-- `ghcr.io/DisplaceTech/mariadb:11` - Major version
+- `ghcr.io/displacetech/mariadb:latest` - Latest stable MariaDB
+- `ghcr.io/displacetech/mariadb:11.5` - Specific version
+- `ghcr.io/displacetech/mariadb:11` - Major version
 
 ## Migration Guide
 

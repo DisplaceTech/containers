@@ -21,10 +21,10 @@ Welcome to our container library! This project provides production-ready contain
 All our images are available on GitHub Container Registry. You can pull them using:
 
 ```bash
-docker pull ghcr.io/DisplaceTech/apache:latest
-docker pull ghcr.io/DisplaceTech/php-fpm:8.4
-docker pull ghcr.io/DisplaceTech/mariadb:latest
-docker pull ghcr.io/DisplaceTech/wordpress:6.8.3-php8.4
+docker pull ghcr.io/displacetech/apache:latest
+docker pull ghcr.io/displacetech/php-fpm:8.4
+docker pull ghcr.io/displacetech/mariadb:latest
+docker pull ghcr.io/displacetech/wordpress:6.8.3-php8.4
 ```
 
 ### WordPress Stack with Docker Compose
@@ -37,7 +37,7 @@ version: '3.8'
 
 services:
   wordpress:
-    image: ghcr.io/DisplaceTech/wordpress:6.8.3-php8.4
+    image: ghcr.io/displacetech/wordpress:6.8.3-php8.4
     ports:
       - "8080:8080"
     environment:
@@ -51,7 +51,7 @@ services:
       - mariadb
 
   mariadb:
-    image: ghcr.io/DisplaceTech/mariadb:latest
+    image: ghcr.io/displacetech/mariadb:latest
     environment:
       MYSQL_ROOT_PASSWORD: root_password
       MYSQL_DATABASE: wordpress
@@ -75,27 +75,27 @@ Your WordPress site will be available at http://localhost:8080
 ## Available Images
 
 ### Apache Web Server
-- **Image**: `ghcr.io/DisplaceTech/apache`
+- **Image**: `ghcr.io/displacetech/apache`
 - **Tags**: `latest`, `2.4.65`
 - **Base**: Alpine 3.22
 - **Exposed Ports**: 80, 443
 
 ### PHP-FPM
-- **Image**: `ghcr.io/DisplaceTech/php-fpm`
+- **Image**: `ghcr.io/displacetech/php-fpm`
 - **Tags**: `latest` (→8.4.13), `8.4`, `8.4.13`, `8.3`, `8.3.26`
 - **Base**: Alpine 3.22
 - **Exposed Ports**: 9000
 - **Extensions**: Common PHP extensions for WordPress development
 
 ### MariaDB
-- **Image**: `ghcr.io/DisplaceTech/mariadb`
+- **Image**: `ghcr.io/displacetech/mariadb`
 - **Tags**: `latest`, version-specific tags
 - **Base**: Alpine 3.22
 - **Exposed Ports**: 3306
 - **Features**: Optimized configuration, health checks
 
 ### WordPress
-- **Image**: `ghcr.io/DisplaceTech/wordpress`
+- **Image**: `ghcr.io/displacetech/wordpress`
 - **Tags**: `6.8.3-php8.4`, `6.8.3-php8.3`
 - **Base**: Alpine 3.22
 - **Exposed Ports**: 8080

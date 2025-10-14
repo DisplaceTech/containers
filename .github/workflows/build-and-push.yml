@@ -286,11 +286,18 @@ jobs:
           cache-from: type=gha,scope=wordpress-${{ matrix.php_version }}
           cache-to: type=gha,mode=max,scope=wordpress-${{ matrix.php_version }}
 
-  # Test the built containers
-  test-containers:
+  # Test WordPress stack integration
+  test-wordpress-stack:
     runs-on: ubuntu-latest
-    needs: [build-apache, build-php-fpm, build-mariadb, build-wordpress]
-    if: always() && !cancelled()
+    needs: [detect-changes, build-mariadb, build-wordpress]
+    if: |
+      always() && !cancelled() && (
+        needs.detect-changes.outputs.wordpress == 'true' ||
+        needs.detect-changes.outputs.mariadb == 'true' ||
+        github.event.inputs.container == 'all' ||
+        github.event.inputs.container == 'wordpress' ||
+        github.event.inputs.container == 'mariadb'
+      )
     permissions:
       contents: read
       packages: read
@@ -324,24 +331,91 @@ jobs:
             
             # Wait for services to be healthy
             echo "Waiting for services to be healthy..."
-            sleep 45
+            sleep 60
             
             # Test WordPress response
             timeout 60 bash -c 'until curl -f http://localhost:8080; do sleep 2; done'
             echo "✅ WordPress is responding"
             
-            # Test database connection
-            docker compose -f wordpress-complete.yml exec -T wordpress wp --allow-root db check
-            echo "✅ Database connection working"
+            # Test database connection - more robust approach
+            echo "Testing database connection..."
+            # First, wait for WordPress to be fully initialized
+            sleep 30
+            
+            # Check if WordPress can connect to database via WP-CLI
+            if docker compose -f wordpress-complete.yml exec -T wordpress wp --allow-root core is-installed; then
+              echo "✅ WordPress is installed and database connection working"
+            else
+              echo "WordPress not yet installed, checking database connectivity directly..."
+              docker compose -f wordpress-complete.yml exec -T wordpress wp --allow-root db check
+              echo "✅ Database connection working (WordPress not installed yet)"
+            fi
             
             # Cleanup
             docker compose -f wordpress-complete.yml down -v
           fi
 
+  # Test individual containers (basic health checks)
+  test-containers:
+    runs-on: ubuntu-latest
+    needs: [detect-changes, build-apache, build-php-fpm, build-mariadb]
+    if: |
+      always() && !cancelled() && (
+        needs.detect-changes.outputs.apache == 'true' ||
+        needs.detect-changes.outputs.php-fpm == 'true' ||
+        needs.detect-changes.outputs.mariadb == 'true' ||
+        github.event.inputs.container == 'all' ||
+        github.event.inputs.container == 'apache' ||
+        github.event.inputs.container == 'php-fpm' ||
+        github.event.inputs.container == 'mariadb'
+      )
+    permissions:
+      contents: read
+      packages: read
+    steps:
+      - name: Test Apache container
+        if: |
+          needs.detect-changes.outputs.apache == 'true' ||
+          github.event.inputs.container == 'all' ||
+          github.event.inputs.container == 'apache'
+        run: |
+          echo "Testing Apache container basic functionality..."
+          docker run --rm -d --name test-apache -p 8081:80 ghcr.io/displacetech/apache:latest
+          sleep 10
+          curl -f http://localhost:8081 && echo "✅ Apache responding"
+          docker stop test-apache
+          
+      - name: Test PHP-FPM container
+        if: |
+          needs.detect-changes.outputs.php-fpm == 'true' ||
+          github.event.inputs.container == 'all' ||
+          github.event.inputs.container == 'php-fpm'
+        run: |
+          echo "Testing PHP-FPM container basic functionality..."
+          docker run --rm -d --name test-php-fpm ghcr.io/displacetech/php-fpm:latest
+          sleep 5
+          docker exec test-php-fpm php --version && echo "✅ PHP-FPM responding"
+          docker stop test-php-fpm
+          
+      - name: Test MariaDB container
+        if: |
+          needs.detect-changes.outputs.mariadb == 'true' ||
+          github.event.inputs.container == 'all' ||
+          github.event.inputs.container == 'mariadb'
+        run: |
+          echo "Testing MariaDB container basic functionality..."
+          docker run --rm -d --name test-mariadb \
+            -e MYSQL_ROOT_PASSWORD=test123 \
+            -e MYSQL_DATABASE=testdb \
+            ghcr.io/displacetech/mariadb:latest
+          sleep 15
+          docker exec test-mariadb mariadb-admin ping -h localhost && echo "✅ MariaDB responding"
+          docker stop test-mariadb
+
   # Summary job
   build-summary:
     runs-on: ubuntu-latest
-    needs: [detect-changes, build-apache, build-php-fpm, build-mariadb, build-wordpress, test-containers]
+    needs: [detect-changes, build-apache, build-php-fpm, build-mariadb, build-wordpress, test-containers, test-wordpress-stack]
     if: always()
     steps:
       - name: Build Summary

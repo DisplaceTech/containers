@@ -1,5 +1,11 @@
 # The Displace Technologies Container Library
 
+<p align="center">
+    <a href="https://github.com/displacetech/containers"><img src="https://badgen.net/github/stars/displacetech/containers?icon=github" /></a>
+    <a href="https://github.com/displacetech/containers"><img src="https://badgen.net/github/forks/displacetech/containers?icon=github" /></a>
+    <a href="https://github.com/displacetech/containers/actions/workflows/build-and-push.yml"><img src="https://github.com/displacetech/containers/actions/workflows/build-and-push.yml/badge.svg" /></a>
+</p>
+
 Popular projects, fully containerized by [Displace Technologies](https://displace.tech).
 
 ## Overview

@@ -248,9 +248,13 @@ jobs:
         php_version: ['8.3', '8.4']
         include:
           - php_version: '8.3'
+            php_full_version: '8.3.26'
             wordpress_version: '6.8.3'
+            is_latest: false
           - php_version: '8.4'
+            php_full_version: '8.4.13'
             wordpress_version: '6.8.3'
+            is_latest: true
     steps:
       - name: Checkout repository
         uses: actions/checkout@v5
@@ -272,8 +276,10 @@ jobs:
         with:
           images: ${{ env.REGISTRY }}/${{ env.REGISTRY_NAMESPACE }}/wordpress
           tags: |
-            type=ref,event=pr
+            type=ref,event=pr,suffix=-php${{ matrix.php_version }}
+            type=raw,value=latest,enable={{is_default_branch}},enable=${{ matrix.is_latest }}
             type=raw,value=${{ matrix.wordpress_version }}-php${{ matrix.php_version }},enable={{is_default_branch}}
+            type=raw,value=${{ matrix.wordpress_version }}-php${{ matrix.php_full_version }},enable={{is_default_branch}}
 
       - name: Build and push WordPress ${{ matrix.wordpress_version }}-php${{ matrix.php_version }} image
         uses: docker/build-push-action@v6

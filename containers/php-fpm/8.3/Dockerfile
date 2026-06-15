@@ -1,4 +1,4 @@
-FROM alpine:3.23
+FROM alpine:3.24
 
 # Build arguments
 ARG PHP_VERSION=8.3.26

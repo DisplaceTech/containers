@@ -1,4 +1,4 @@
-FROM alpine:3.23
+FROM alpine:3.24
 
 # Metadata labels
 LABEL org.opencontainers.image.title="Apache HTTP Server"
